@@ -31,9 +31,7 @@ This tool is meant for cybersecurity researchers, students, and ethical hackers 
 Handshakes are saved to the loot/ folder automatically
 
 💜 Credits
-Inspired by Spam Jam BLE Tool
-
-Powered by Scapy
+Inspired by Spam-Jam BLE Tool & Powered by Scapy
 
 ## 🔧 Installation
 
