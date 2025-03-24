@@ -45,5 +45,5 @@ cd Jam_fi
 sudo ip link set wlan down
 sudo iw dev wlan0 set type monitor
 sudo ip link set wlan0 up
-sudo python3 jamfi.py
+sudo python3 jam_fi.py
 
