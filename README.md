@@ -29,9 +29,22 @@ This tool is meant for cybersecurity researchers, students, and ethical hackers 
 
 ## 🔧 Installation
 
+
 ```bash
 sudo apt update && sudo apt install -y python3 python3-pip
 sudo pip3 install scapy
 git clone https://github.com/ekomsSavior/Jam_fi.git
 cd Jam_fi
+#set wifi adapter in monitor mode#
+sudo ip link set wlan down
+sudo iw dev wlan0 set type monitor
+sudo ip link set wlan0 up
 sudo python3 jamfi.py
+
+📁 Output
+Handshakes are saved to the loot/ folder automatically
+
+💜 Credits
+Inspired by Spam Jam BLE Tool
+
+Powered by Scapy
