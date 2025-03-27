@@ -113,7 +113,7 @@ def crack_handshakes():
         if not os.path.exists(loot_dir):
             print("⚠️ Loot folder not found.")
             return
-        pcaps = [f for f in os.listdir(loot_dir) if f.endswith((".pcap", ".cap", ".hccapx"))]
+        pcaps = [f for f in os.listdir(loot_dir) if f.endswith((".pcap", ".cap", ".hccapx", ".hc22000"))]
         if not pcaps:
             print("⚠️ No handshake files found.")
             return
@@ -126,7 +126,7 @@ def crack_handshakes():
             print("⚠️ Invalid selection.")
             return
     elif mode == "2":
-        file_path = input("💜 Enter full path to .pcap/.cap/.hccapx file: ").strip()
+        file_path = input("💜 Enter full path to .pcap/.cap/.hccapx/.hc22000: ").strip()
         if not os.path.isfile(file_path):
             print("❌ File not found.")
             return
@@ -149,16 +149,23 @@ def crack_handshakes():
     if tool == "1":
         print("✨ Cracking with Aircrack-ng... 🔍")
         os.system(f"aircrack-ng '{file_path}' -w '{wordlist}'")
-
     elif tool == "2":
-        if not file_path.endswith(".hccapx"):
-            hccapx_path = file_path.rsplit(".", 1)[0] + ".hccapx"
-            print(f"🔄 Converting {file_path} to {hccapx_path}...")
-            os.system(f"cap2hccapx '{file_path}' '{hccapx_path}'")
+        session = "jamfi_session"
+        if file_path.endswith(".hccapx"):
+            hcx_path = file_path
+            mode = 2500
+        elif file_path.endswith(".hc22000"):
+            hcx_path = file_path
+            mode = 22000
         else:
-            hccapx_path = file_path
+            hcx_path = file_path.rsplit(".", 1)[0] + ".hc22000"
+            print(f"🔄 Converting {file_path} to {hcx_path} with hcxpcapngtool...")
+            os.system(f"hcxpcapngtool -o '{hcx_path}' '{file_path}'")
+            mode = 22000
         print("🐉 Cracking with Hashcat... use Ctrl+C to stop anytime.")
-        os.system(f"hashcat -m 22000 '{hccapx_path}' '{wordlist}' --force")
+        os.system(f"hashcat -m {mode} '{hcx_path}' '{wordlist}' --force --session {session} --potfile-path jamfi.potfile")
+    else:
+        print("⚠️ Invalid tool selected.")
 
 def probe_spammer():
     iface = input("💜 Monitor mode interface: ").strip()
