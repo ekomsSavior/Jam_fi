@@ -82,6 +82,11 @@ JamFi defaults to rockyou.txt for cracking, but you can use any wordlist:
 
 # /usr/share/seclists/Passwords
 
+# Troubleshooting Handshake Captures
+- Make sure client reconnects to network
+- Use `--interval 0.1` instead of default
+- Extend attack window to 20–30 seconds
+
 💜 Credits & Inspiration
 
 Inspired by the vibes of Spam-Jam BLE Tool
