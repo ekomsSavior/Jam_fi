@@ -27,7 +27,7 @@ Whether you're a beginner or advanced user, JamFi gives you a hands-on way to ex
 ## 🛠️ Installation
 
 1. Clone the repo:
-```bash
+
 git clone https://github.com/ekomsSavior/JamFi
 cd JamFi
 Make sure you have the following installed:
