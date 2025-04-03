@@ -46,6 +46,8 @@ run from the Jam_fi directory on your machine:
 
 git pull
 
+----------------------------------------------------------------
+
 ## When Jam_fi is running you'll see:
 
 🔹 1  Scan Clients & APs 🔍
