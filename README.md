@@ -84,7 +84,7 @@ git pull
 🔹 0  Quit ❌
      → Exits JamFi and returns to your terminal.
 
-## (*_*) Tips & Tricks for Power Users
+## ✨✨✨ Tips & Tricks for Power Users ✨✨✨
 Jam_Fi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
 
 ⚡ Performance Tips
@@ -194,9 +194,9 @@ The goal is to educate and empower—not to harm. Use wisely 💜
 
 ## 💜 Built With Love
 
-Jam_Fi is a passion project created by @ekomsSavior
+Jam_Fi is a passion project created by @ekomsSavior xoxoxoox sending hugs to all the homies always ✨✨✨
 
 It’s free, open-source, and meant to make learning cybersecurity hands-on, fun, and inclusive for all.
 
-If you like JamFi, give it a ⭐️ on GitHub and share it with your hacker friends!
+If you like Jam_Fi, give it a ⭐️ on GitHub and share it with your h4x0r and cybersecurity friends!
 
