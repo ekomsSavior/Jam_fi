@@ -86,6 +86,8 @@ git pull
 🔹 0  Quit ❌
      → Exits JamFi and returns to your terminal.
 
+--------------------------------------------------------------------------------------------------------------------     
+
 ## ✨✨✨ Tips & Tricks for Power Users ✨✨✨
 Jam_Fi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
 
@@ -110,6 +112,8 @@ Edit the scan delay inside jam_fi.py (look for time.sleep() under channel_hopper
 
 Lowering sleep delay to 0.2 or less can speed things up, but may increase CPU usage.
 
+--------------------------------------------------------------------------------------------------------------------
+
 👿 Evil AP Customization
 🎨 Customize the Captive Portal
 
@@ -132,7 +136,9 @@ You can view your collected credentials in:
 
 loot/creds.txt
 
-🔐 Advanced Hack: Fake Browser Update + Payload (Optional)
+-------------------------------------------------------------------------------------------------------------------
+
+## 🔐 Advanced User Trick: Fake Browser Update + Payload (Optional)
 
 JamFi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required!
 
@@ -165,7 +171,7 @@ You now have a simulated Remote Code Execution (RCE) opportunity: if the victim 
 
 ⚠️ JamFi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine.
 
-
+--------------------------------------------------------------------------------------------------------------------------------
 
 ## 💼 The loot/ Folder
 
@@ -193,6 +199,8 @@ injection.html	Used for MITM HID payload simulation (fake keystroke browser page
 
 All of these files are auto-generated if missing, so don’t stress if you delete them!
 
+----------------------------------------------------------------------------------
+
 ## 🚨 Disclaimer
 
 This tool is for educational and authorized research only.
@@ -202,6 +210,8 @@ By using Jam_Fi, you agree that you are responsible for your own actions.
 Do not use this tool on networks or devices you don’t have explicit permission to test.
 
 The goal is to educate and empower—not to harm. Use wisely 💜
+
+---------------------------------------------------------------------------------------------
 
 ## 💜 Built With Love
 
