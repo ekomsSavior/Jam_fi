@@ -45,7 +45,7 @@ run from the Jam_fi directory on your machine:
 
 git pull
 
-When jam_fi is running you'll see:
+##When jam_fi is running you'll see:
 
 🔹 1  Scan Clients & APs 🔍
      → Scans for nearby Wi-Fi networks (Access Points) and the clients connected to them using Scapy.
@@ -83,7 +83,7 @@ When jam_fi is running you'll see:
 🔹 0  Quit ❌
      → Exits JamFi and returns to your terminal.
 
-🧩 Tips & Tricks for Power Users
+##🧩 Tips & Tricks for Power Users
 JamFi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
 
 ⚡ Performance Tips
@@ -155,7 +155,7 @@ You now have a simulated Remote Code Execution (RCE) opportunity: once the user 
 
 ⚠️ JamFi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine. 
 
-💼 The loot/ Folder
+##💼 The loot/ Folder
 
 This folder contains all the important config and phishing assets used by Evil AP and MITM modes:
 
@@ -181,7 +181,7 @@ injection.html	Used for MITM HID payload simulation (fake keystroke browser page
 
 All of these files are auto-generated if missing, so don’t stress if you delete them!
 
-🚨 Disclaimer
+##🚨 Disclaimer
 
 This tool is for educational and authorized research only.
 
@@ -191,7 +191,7 @@ Do not use this tool on networks or devices you don’t have explicit permission
 
 The goal is to educate and empower—not to harm. Use wisely 💜
 
-💜 Built With Love
+##💜 Built With Love
 
 JamFi is a passion project created by @ekomsSavior
 
