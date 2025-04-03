@@ -1,15 +1,16 @@
-# 💜 JamFi – Wi-Fi Chaos Tool  
+# 💜 Jam_Fi – Wi-Fi Chaos Tool  
 by [@ekomsSavior](https://github.com/ekomsSavior)
 
 > Built with love to teach, explore, and cause a little friendly Wi-Fi mischief. 💅
 
 ---
 
-## ✨ What is JamFi?
+## ✨ What is Jam_Fi?
 
-JamFi is a powerful and playful Wi-Fi chaos and red teaming toolkit written in Python for Kali Linux. It's designed for educational and cybersecurity research purposes, helping you learn how attackers exploit wireless networks—and how to defend against them.
+Jam_Fi is a powerful and playful Wi-Fi chaos and red teaming toolkit written in Python for Kali Linux. 
+It's designed for educational and cybersecurity research purposes, helping you learn how attackers exploit wireless networks—and how to defend against them.
 
-JamFi includes tools for:
+Jam_Fi includes tools for:
 
 - Evil Twin Access Points ☠️  
 - Deauthentication Attacks 💥  
@@ -20,7 +21,7 @@ JamFi includes tools for:
 - Fake Login Phishing with Auto-Logging 📄  
 - and more...
 
-Whether you're a beginner or advanced user, JamFi gives you a hands-on way to experiment and learn in a lab setting.
+Whether you're a beginner or advanced user, Jam_Fi gives you a hands-on way to experiment and learn in a lab setting.
 
 ---
 
@@ -45,7 +46,7 @@ run from the Jam_fi directory on your machine:
 
 git pull
 
-## When jam_fi is running you'll see:
+## When Jam_fi is running you'll see:
 
 🔹 1  Scan Clients & APs 🔍
      → Scans for nearby Wi-Fi networks (Access Points) and the clients connected to them using Scapy.
@@ -84,7 +85,7 @@ git pull
      → Exits JamFi and returns to your terminal.
 
 ## (*_*) Tips & Tricks for Power Users
-JamFi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
+Jam_Fi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
 
 ⚡ Performance Tips
 
@@ -131,7 +132,7 @@ loot/creds.txt
 
 🔐 Advanced Hack: Fake Browser Update + Payload (Optional)
 
-JamFi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required. Once a device connects to your Evil AP, you can redirect them
+Jam_Fi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required. Once a device connects to your Evil AP, you can redirect them
 
 to a custom update page that looks legit and even downloads a file of your choosing. You control it via loot/injection.html. Here's a simple example:
 
@@ -153,7 +154,7 @@ Just place your payload or tool (like netcat, reverse_shell.exe, etc.) in the lo
 
 You now have a simulated Remote Code Execution (RCE) opportunity: once the user runs your downloaded file, you can initiate reverse shells or persistence — depending on your lab setup.
 
-⚠️ JamFi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine. 
+⚠️ Jam_Fi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine. 
 
 ## 💼 The loot/ Folder
 
@@ -185,7 +186,7 @@ All of these files are auto-generated if missing, so don’t stress if you delet
 
 This tool is for educational and authorized research only.
 
-By using JamFi, you agree that you are responsible for your own actions.
+By using Jam_Fi, you agree that you are responsible for your own actions.
 
 Do not use this tool on networks or devices you don’t have explicit permission to test.
 
@@ -193,7 +194,7 @@ The goal is to educate and empower—not to harm. Use wisely 💜
 
 ## 💜 Built With Love
 
-JamFi is a passion project created by @ekomsSavior
+Jam_Fi is a passion project created by @ekomsSavior
 
 It’s free, open-source, and meant to make learning cybersecurity hands-on, fun, and inclusive for all.
 
