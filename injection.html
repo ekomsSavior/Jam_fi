@@ -1,0 +1,18 @@
+<html><body>
+    <h2>Welcome to 00:00:00:99</h2>
+    <p>Connecting... please wait.</p>
+    <script>
+    setTimeout(() => {
+        alert("Installing driver...");
+        let keys = ["Windows+R", "cmd", "ENTER", "whoami", "ENTER"];
+        let i = 0;
+        function typeNext() {
+            if (i < keys.length) {
+                console.log("Injecting:", keys[i]);
+                i++;
+                setTimeout(typeNext, 1500);
+            }
+        }
+        typeNext();
+    }, 3000);
+    </script></body></html>
