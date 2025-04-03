@@ -32,18 +32,16 @@ git clone https://github.com/ekomsSavior/JamFi
 cd JamFi
 Make sure you have the following installed:
 
-bash
-Copy
-Edit
 sudo apt update
+
 sudo apt install -y aircrack-ng hostapd dnsmasq dnsspoof python3-scapy
+
 Run the tool:
 
-bash
-Copy
-Edit
 sudo python3 jam_fi.py
+
 🌀 Features & Menu
+
 When you run JamFi, you’ll see a menu like this:
 
 🔹 1  Scan Clients & APs 🔍
