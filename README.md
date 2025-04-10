@@ -5,6 +5,9 @@ by [@ekomsSavior](https://github.com/ekomsSavior)
 
 ---
 
+![image3](https://github.com/user-attachments/assets/960cce0f-7854-4080-b977-b0a02fb34418)
+
+
 ## ✨ What is Jam_Fi?
 
 Jam_Fi is a powerful and playful Wi-Fi chaos and red teaming toolkit written in Python for Kali Linux. 
