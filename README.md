@@ -34,7 +34,7 @@ Whether you're a beginner or advanced user, Jam_Fi gives you a hands-on way to e
 
 git clone https://github.com/ekomsSavior/Jam_Fi.git
 
-cd JamFi
+cd Jam_Fi
 
 Make sure you have the following installed:
 
@@ -44,7 +44,7 @@ sudo apt install -y aircrack-ng hostapd dnsmasq dnsspoof python3-scapy
 
 Run the tool:
 
-sudo python3 jam_fi.py
+sudo python3 jamfi.py
 
 *To Update periodically:
 
