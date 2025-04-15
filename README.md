@@ -32,7 +32,7 @@ Whether you're a beginner or advanced user, Jam_Fi gives you a hands-on way to e
 
 1. Clone the repo:
 
-git clone https://github.com/ekomsSavior/JamFi.git
+git clone https://github.com/ekomsSavior/Jam_Fi.git
 
 cd JamFi
 
