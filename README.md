@@ -44,7 +44,7 @@ sudo apt install -y aircrack-ng hostapd dnsmasq dnsspoof python3-scapy
 
 Run the tool:
 
-sudo python3 jamfi.py
+sudo python3 jam_fi.py
 
 *To Update periodically:
 
