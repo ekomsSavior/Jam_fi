@@ -34,7 +34,7 @@ Whether you're a beginner or advanced user, Jam_Fi gives you a hands-on way to e
 
 git clone https://github.com/ekomsSavior/Jam_Fi.git
 
-cd Jam_Fi
+cd Jam_fi
 
 Make sure you have the following installed:
 
