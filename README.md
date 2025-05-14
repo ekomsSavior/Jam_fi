@@ -5,10 +5,6 @@ by [@ekomsSavior]
 
 ![image3](https://github.com/user-attachments/assets/960cce0f-7854-4080-b977-b0a02fb34418)
 
-# Jam_Fi – Wi-Fi Chaos Toolkit  
-Created by [@ekomsSavior](https://github.com/ekomsSavior)
-
----
 
 ## What is Jam_Fi?
 
