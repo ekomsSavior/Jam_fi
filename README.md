@@ -130,7 +130,7 @@ Descriptions
 - **Chaos Mode** – Combines probe spam, junk flood, and karma attack.
 - **View Loot** – Shows saved handshakes and credentials in `loot/`.
 - **Evil AP** – Launches a rogue access point with credential logging and DNS spoofing.
-- **MITM HID Injection** – Fakes a “driver install” page using beacon spoof + JavaScript.
+- **MITM HID Injection** – Serve payloads + log keystrokes via HTML/JS.
 
 ---
 
