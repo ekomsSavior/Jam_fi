@@ -196,11 +196,13 @@ cd ~/Jam_fi
 wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
 unzip ngrok-stable-linux-amd64.zip
 chmod +x ngrok
+'''
 
 3. add your authtoken (from your Ngrok dashboard)
 
 '''bash
 ./ngrok config add-authtoken YOUR_AUTHTOKEN
+'''
 
 
 ---
