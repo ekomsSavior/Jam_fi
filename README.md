@@ -15,8 +15,9 @@ Jam_Fi is an offensive wireless toolkit for Kali Linux, built for red team simul
 - Probe request and junk frame flooding
 - Evil twin access points with credential logging
 - Karma responder beacon spoofing
-- MITM injection with fake update pages
+- MITM injection with fake update pages and keystroke logging.
 - Custom captive portals and payload delivery
+- Now with Ngrok Support!
 
 All features are designed for local lab use and legal environments only.
 
