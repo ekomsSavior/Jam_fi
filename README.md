@@ -170,7 +170,7 @@ also check out the payloads_README in the payloads folder xo
 
 ## MITM HID Injection Overview
 
-When you choose option `11`:
+When you choose option `11`
 
 - Broadcasts a fake SSID using beacon spoofing  
 - Clients connect, see `injection.html`  
@@ -181,8 +181,27 @@ When you choose option `11`:
 
 All files are served from `http://10.0.0.1`.
 
-
 Add your own payloads to the `payloads/` directory and they will auto load for use with Jam_fi MITM.
+---
+
+## Ngrok Setup (for Remote Payload Delivery)
+
+To use Ngrok in JamFi
+
+1. [Download Ngrok](https://ngrok.com/download) for Linux
+2. Unzip it into your JamFi folder
+
+```bash
+cd ~/Jam_fi
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
+unzip ngrok-stable-linux-amd64.zip
+chmod +x ngrok
+
+3. add your authtoken (from your Ngrok dashboard)
+
+'''bash
+./ngrok config add-authtoken YOUR_AUTHTOKEN
+
 
 ---
 
