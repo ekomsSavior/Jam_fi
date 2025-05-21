@@ -168,41 +168,54 @@ Add real payloads here! These get served by the MITM module:
 also check out the payloads_README in the payloads folder xo
 ---
 
-## MITM HID Injection Overview
-
-When you choose option `11`
-
-- Broadcasts a fake SSID using beacon spoofing  
-- Clients connect, see `injection.html`  
-- JS keylogger logs keystrokes  
-- Page auto-redirects to `fake_update.html`  
-- Payloads download when user clicks **Update**  
-- Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
-
-All files are served from `http://10.0.0.1`.
-
-Add your own payloads to the `payloads/` directory and they will auto load for use with Jam_fi MITM.
 ---
 
-## Ngrok Setup (for Remote Payload Delivery)
+## 🧠 MITM HID Injection Overview
 
-To use Ngrok in JamFi
+When you choose option `11` in JamFi:
 
-1. [Download Ngrok](https://ngrok.com/download) for Linux
-2. Unzip it into your JamFi folder
+- 📡 Broadcasts a fake SSID using beacon spoofing  
+- 🧲 Clients connect and are served `injection.html`  
+- 🎯 JavaScript keylogger logs user keystrokes  
+- 🔁 Page auto-redirects to `fake_update.html`  
+- 📦 Payload downloads when the user clicks **Update**  
+- 📝 Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
 
-```bash
-cd ~/Jam_fi
-wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
-unzip ngrok-stable-linux-amd64.zip
-chmod +x ngrok
-'''
+All files are served from:  
+`http://10.0.0.1`
 
-3. add your authtoken (from your Ngrok dashboard)
+To add your own payloads, drop them into the `payloads/` folder. JamFi will automatically load and offer them during MITM mode.
 
-'''bash
-./ngrok config add-authtoken YOUR_AUTHTOKEN
-'''
+---
+
+## 🌍 Ngrok Setup (for Remote Payload Delivery)
+
+Want to serve payloads outside your local network? JamFi supports [Ngrok](https://ngrok.com) for public tunnels.
+
+###  Setup Instructions
+
+1. Download Ngrok for Linux:
+   ```bash
+   cd ~/Jam_fi
+   wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip
+   unzip ngrok-stable-linux-amd64.zip
+   chmod +x ngrok
+   ```
+
+2. Add your Ngrok authtoken (from your [Ngrok Dashboard](https://dashboard.ngrok.com/get-started/your-authtoken)):
+   ```bash
+   ./ngrok config add-authtoken YOUR_AUTHTOKEN
+   ```
+
+That’s it! When you launch MITM Mode and choose Ngrok, JamFi will automatically:
+
+- Start a public tunnel on port 80
+- Rewrite your HTML files to use `https://<your-ngrok>.ngrok-free.app`
+- Serve your payloads globally
+
+>  **Warning:** Ngrok links are public. Use only in secure test labs.
+
+---
 
 
 ---
