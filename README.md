@@ -170,16 +170,16 @@ also check out the payloads_README in the payloads folder xo
 
 ---
 
-## 🧠 MITM HID Injection Overview
+##  MITM HID Injection Overview
 
 When you choose option `11` in JamFi:
 
-- 📡 Broadcasts a fake SSID using beacon spoofing  
-- 🧲 Clients connect and are served `injection.html`  
-- 🎯 JavaScript keylogger logs user keystrokes  
-- 🔁 Page auto-redirects to `fake_update.html`  
-- 📦 Payload downloads when the user clicks **Update**  
-- 📝 Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
+-  Broadcasts a fake SSID using beacon spoofing  
+-  Clients connect and are served `injection.html`  
+-  JavaScript keylogger logs user keystrokes  
+-  Page auto-redirects to `fake_update.html`  
+-  Payload downloads when the user clicks **Update**  
+-  Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
 
 All files are served from:  
 `http://10.0.0.1`
@@ -188,7 +188,7 @@ To add your own payloads, drop them into the `payloads/` folder. JamFi will auto
 
 ---
 
-## 🌍 Ngrok Setup (for Remote Payload Delivery)
+##  Ngrok Setup (for Remote Payload Delivery)
 
 Want to serve payloads outside your local network? JamFi supports [Ngrok](https://ngrok.com) for public tunnels.
 
