@@ -129,7 +129,7 @@ Descriptions
 - **Junk Packet Flood** – Sends randomized frames to clutter the spectrum.
 - **Karma Responder** – Replies to probe requests with fake beacons.
 - **Chaos Mode** – Combines probe spam, junk flood, and karma attack.
-- **View Loot** – Shows saved handshakes and credentials in `loot/`.
+- **View Loot** – Browse and print files stored in the `loot/` folder.
 - **Evil AP** – Launches a rogue access point with credential logging and DNS spoofing.
 - **MITM HID Injection** – Serve payloads + log keystrokes via HTML/JS.
 

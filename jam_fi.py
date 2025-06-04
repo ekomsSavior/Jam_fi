@@ -157,6 +157,35 @@ def crack_handshakes():
     else:
         print("⚠️ Invalid choice.")
 
+def loot_viewer():
+    """Simple browser for files saved in the loot/ directory."""
+    loot_dir = "loot"
+    if not os.path.isdir(loot_dir):
+        print("⚠️ loot directory not found.")
+        return
+    files = sorted(os.listdir(loot_dir))
+    if not files:
+        print("⚠️ loot is empty.")
+        return
+
+    print("\n📂 Files in loot/:")
+    for idx, name in enumerate(files, 1):
+        print(f"{idx}. {name}")
+
+    choice = input("\n💜 Choose a file to view (press Enter to return): ").strip()
+    if not choice:
+        return
+    if not choice.isdigit() or int(choice) < 1 or int(choice) > len(files):
+        print("⚠️ Invalid selection.")
+        return
+    path = os.path.join(loot_dir, files[int(choice)-1])
+    print(f"\n--- {files[int(choice)-1]} ---")
+    try:
+        with open(path, "r", errors="ignore") as f:
+            print(f.read())
+    except Exception as e:
+        print(f"⚠️ Could not read {files[int(choice)-1]}: {e}")
+
 def probe_spammer(iface=None):
     if iface is None:
         iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
