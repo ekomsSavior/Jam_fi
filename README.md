@@ -38,6 +38,23 @@ Install dependencies
 sudo apt update
 sudo apt install -y aircrack-ng hostapd dnsmasq python3-scapy
 ```
+---
+
+##  ngrok Setup
+
+```bash
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+tar -xvzf ngrok-v3-stable-linux-amd64.tgz
+sudo mv ngrok /usr/local/bin/
+```
+
+Authenticate your account:
+
+```bash
+ngrok config add-authtoken <YOUR_NGROK_AUTH_TOKEN>
+```
+
+---
 
 Run the tool:
 
