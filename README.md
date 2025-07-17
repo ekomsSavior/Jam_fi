@@ -36,7 +36,7 @@ Install dependencies
 
 ```bash
 sudo apt update
-sudo apt install -y aircrack-ng hostapd dnsmasq dnsspoof python3-scapy
+sudo apt install -y aircrack-ng hostapd dnsmasq python3-scapy
 ```
 
 Run the tool:
