@@ -1,5 +1,6 @@
 # Jam_Fi – Wi-Fi Chaos Tool  
-by [@ekomsSavior]
+
+![ek0ms Banner](https://img.shields.io/badge/ek0ms-certified_ethcial_hacker-blue)
 
 ---
 
