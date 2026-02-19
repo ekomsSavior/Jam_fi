@@ -10,8 +10,6 @@ This folder contains real payloads delivered by JamFi’s MITM HID Injection mod
 
 - **`payload.hta`** –  A Windows HTML application that auto-executes a PowerShell payload when opened. Ideal for older Windows versions and Internet Explorer. Make sure your `payload.exe` is reachable at the link hardcoded in the file.
 
-- **`reverse_shell.zip`** –  A zipped Bash reverse shell. When the victim extracts and runs it, it connects back to your terminal. You must run `sudo nc -lvnp 4444` before the victim opens it to catch the shell.
-
 - **`autostart.html`** –  A fake update page that redirects to download `payload.exe` immediately when loaded. Simple, quick, and effective for drive-by-style delivery.
 
 - **`macro.vba`** –  A Word macro script that executes a PowerShell command when a `.docm` file is opened. You don’t need to modify this — just understand that it must be embedded in a Word doc manually for full execution.
