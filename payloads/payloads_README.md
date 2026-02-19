@@ -18,6 +18,8 @@ This folder contains real payloads delivered by JamFi’s MITM HID Injection mod
 
 - **`keylogger_beacon.py`** –  A Python keylogger beacon that connects to your server. To use it, listen on the defined port or modify it to suit your lab. Best for staged post-exploitation or testing EDR evasion.
 
+- **`reverse_shell.zip`** –  A zipped Bash reverse shell. When the victim extracts and runs it, it connects back to your terminal. You must run `sudo nc -lvnp 4444` before the victim opens it to catch the shell.
+
 All payloads are delivered via `http://10.0.0.1` by JamFi’s MITM module when you choose Option 11 and a payload from the list. 
 Logs from keystrokes and page visits are saved to `loot/keystroke_log_*.txt` and `loot/session_log_*.txt`. 
 You do not need to change the IP — JamFi handles it. Just make sure you’re listening or serving the next stage where needed. 
