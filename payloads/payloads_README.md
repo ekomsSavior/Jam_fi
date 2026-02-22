@@ -1,6 +1,10 @@
 # JamFi Payloads – MITM Tips & Tricks
 
-This folder contains real payloads delivered by JamFi's MITM HID Injection module (Option 11). Each payload behaves differently and may require you to open a listener, run Metasploit, serve follow-up files, or set up the ROGUE Command & Control (C2) server. All payloads are delivered via http://10.0.0.1 by JamFi's MITM module. Logs from keystrokes and page visits are saved to loot/keystroke_log_*.txt and loot/session_log_*.txt. You do not need to change the IP — JamFi handles it. Just make sure you're listening or serving the next stage where needed.
+This folder contains real payloads delivered by JamFi's MITM HID Injection module (Option 11). 
+Each payload behaves differently and may require you to open a listener, run Metasploit, serve follow-up files, or set up the ROGUE Command & Control (C2) server. 
+All payloads are delivered via http://10.0.0.1 by JamFi's MITM module. 
+Logs from keystrokes and page visits are saved to loot/keystroke_log_*.txt and loot/session_log_*.txt. 
+You do not need to change the IP — JamFi handles it. Just make sure you're listening or serving the next stage where needed.
 
 ---
 
@@ -36,9 +40,32 @@ For rogue_implant.py and any payload deployed via it, you must have the ROGUE C2
     ```bash
     git clone https://github.com/ekomsSavior/rogue.git
     cd rogue
-    pip3 install -r requirements.txt
     ```
+    ### **Install Dependencies**
+```bash
+# Core dependencies
+sudo apt update
+sudo apt install python3 python3-pip python3-dev python3-venv -y
 
+# Install Python packages
+pip3 install pycryptodome flask requests psutil setproctitle netifaces paramiko pynput --break-system-packages
+
+# Optional for cloud features
+pip3 install boto3 azure-identity google-cloud-storage kubernetes --break-system-packages
+
+# For advanced payloads
+pip3 install pyautogui python-nmap secretstorage --break-system-packages
+```
+### **Ngrok Setup**
+```bash
+# Download and install ngrok
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+tar -xvzf ngrok-v3-stable-linux-amd64.tgz
+sudo mv ngrok /usr/local/bin/
+
+# Set up authentication
+ngrok config add-authtoken YOUR_NGROK_AUTH_TOKEN
+```
 2.  Start the C2 Server:
     ```bash
     python3 rogue_c2.py
