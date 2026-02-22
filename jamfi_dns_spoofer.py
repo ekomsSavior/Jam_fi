@@ -7,7 +7,7 @@ spoof_ip = "10.0.0.1"
 listen_ip = "0.0.0.0"
 listen_port = 53
 
-print(f"🎯 JamFi DNS redirector running on {listen_ip}:{listen_port} → redirecting all to {spoof_ip}")
+print(f" JamFi DNS redirector running on {listen_ip}:{listen_port} → redirecting all to {spoof_ip}")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((listen_ip, listen_port))
