@@ -20,7 +20,7 @@ Jam_Fi is an offensive wireless toolkit for Kali Linux, built for red team simul
 - Custom captive portals and payload delivery
 - Now with Ngrok Support!
 
-All features are designed for local lab use and legal environments only.
+DISCLAIMER : All features are designed for local lab use and legal environments only.
 
 ---
 
