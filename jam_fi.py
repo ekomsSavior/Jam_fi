@@ -14,7 +14,7 @@ if not os.path.isdir("loot"):
 
 def require_root():
     if os.geteuid() != 0:
-        print("⚠️ Jam_Fi must be run as root.")
+        print(" Jam_Fi must be run as root.")
         sys.exit(1)
 
 def cleanup_services(iface=None):
@@ -73,7 +73,7 @@ def packet_handler(pkt):
         if bssid in seen_aps and src != bssid and src not in clients:
             clients[src] = bssid
             scan_results[bssid]["clients"].append(src)
-            print(f"    💡 Client: {src} -> {seen_aps[bssid]}")
+            print(f" Client: {src} -> {seen_aps[bssid]}")
 
 def scan_clients():
     iface = input(" Enter monitor mode interface (e.g. wlan0mon): ").strip()
@@ -104,7 +104,7 @@ def capture_handshake(iface, bssid):
         else:
             print(f"⚠ No handshake captured for {bssid}")
     except Exception as e:
-        print(f"❌ Error sniffing for {bssid}: {e}")
+        print(f" Error sniffing for {bssid}: {e}")
 
 def deauth_attack():
     iface = input(" Monitor mode interface: ").strip()
@@ -140,7 +140,7 @@ def deauth_all():
                 sendp(frame, iface=iface, count=count, inter=delay, verbose=0)
                 print(f" Deauthed {client} from {seen_aps.get(bssid, 'Unknown')}")
             except OSError as e:
-                print(f"❌ Error sending deauth to {client}: {e}")
+                print(f" Error sending deauth to {client}: {e}")
 
 def crack_handshakes():
     print(" Crack Captured Handshakes")
@@ -313,7 +313,7 @@ def mitm_hid_injection():
     for i, f in enumerate(payload_files):
         print(f"{i+1}) {f}")
     print("0) None")
-    choice = input("💜 Choose payload: ").strip()
+    choice = input(" Choose payload: ").strip()
     selected_payload = None
     if choice.isdigit() and int(choice) in range(1, len(payload_files)+1):
         selected_payload = payload_files[int(choice)-1]
@@ -380,7 +380,7 @@ setTimeout(() => {{
 }}, 4000);
 </script></body></html>""")
 
-    # 🔽 Fake Update Page
+    #  Fake Update Page
     with open("loot/fake_update.html", "w") as f:
         if selected_payload:
             f.write(f"""<html><body>
@@ -468,18 +468,18 @@ setTimeout(() => {{
 def main():
     print_banner()
     while True:
-        print("\n🔹 1️⃣  Scan Clients & APs ")
-        print("🔹 2️⃣  Deauth One Client ")
-        print("🔹 3️⃣  Deauth ALL Clients + Capture ")
-        print("🔹 4️⃣  Crack Captured Handshakes ")
-        print("🔹 5️⃣  Probe Request Spam ")
-        print("🔹 6️⃣  Junk Packet Flood ")
-        print("🔹 7️⃣  Karma Responder ")
-        print("🔹 8️⃣  Chaos Mode ")
-        print("🔹 9️⃣  View Loot ")
-        print("🔹 🔟  Evil AP ")
-        print("🔹 11️⃣ MITM HID Injection ")
-        print("🔹 0️⃣  Quit ")
+        print("\n 1  Scan Clients & APs ")
+        print(" 2  Deauth One Client ")
+        print(" 3  Deauth ALL Clients + Capture ")
+        print(" 4  Crack Captured Handshakes ")
+        print(" 5  Probe Request Spam ")
+        print(" 6  Junk Packet Flood ")
+        print(" 7  Karma Responder ")
+        print(" 8  Chaos Mode ")
+        print(" 9  View Loot ")
+        print(" 10  Evil AP ")
+        print(" 11 MITM HID Injection ")
+        print(" 0  Quit ")
         choice = input(" Choose an option: ").strip()
 
         if choice == "1": scan_clients()
@@ -498,7 +498,7 @@ def main():
             cleanup_services()
             sys.exit()
         else:
-            print("⚠️ Invalid choice!")
+            print(" Invalid choice!")
 
 if __name__ == "__main__":
     require_root()
