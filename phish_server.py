@@ -6,7 +6,7 @@ import sys
 
 def require_root():
     if os.geteuid() != 0:
-        print("⚠️ Phish server must be run as root.")
+        print(" Phish server must be run as root.")
         sys.exit(1)
 
 LOG_FILE = "loot/creds.txt"
