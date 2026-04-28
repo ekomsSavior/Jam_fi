@@ -4,7 +4,7 @@
 
 ---
 
-![image3](https://github.com/user-attachments/assets/960cce0f-7854-4080-b977-b0a02fb34418)
+<img width="374" height="109" alt="jamfi" src="https://github.com/user-attachments/assets/47d5a04d-ce40-4bfb-8ca6-759851111389" />
 
 
 ## What is Jam_Fi?
