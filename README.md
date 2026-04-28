@@ -129,25 +129,8 @@ sudo systemctl start NetworkManager
 
 ## Jam_Fi Modules Overview
 
-Each module appears in the menu
+<img width="688" height="668" alt="IMG_3145" src="https://github.com/user-attachments/assets/db35adb9-6d25-463b-a20e-8e415093c87e" />
 
-```
-1  Scan Clients & APs
-2  Deauth One Client
-3  Deauth All Clients + Capture
-4  Crack Captured Handshakes
-5  Probe Request Spam
-6  Junk Packet Flood
-7  Karma Responder
-8  Chaos Mode
-9  View Loot
-10 Evil AP
-11 MITM HID Injection
-12 CVE Vulnerability Scanner & Exploit (NEW)
-13 Auto-Pwn Mode (NEW)
-14 Router Exploits (NEW)
-0  Quit
-```
 
 ### Descriptions
 
