@@ -1,0 +1,70 @@
+Apple,iPhone|iPad|iOS|MacBook|AirPort,CVE-2019-15126,7.5,yes,krack
+Apple,iPhone|iPad|iOS|MacBook|AirPort,CVE-2020-24588,8.2,yes,fragattack
+Apple,iPhone|iPad|iOS|MacBook|AirPort,CVE-2020-26139,7.5,yes,fragattack
+Broadcom,BCM43|BCM4360|BCM4359|BCM4375,CVE-2017-9417,9.8,yes,broadpwn
+Broadcom,BCM43|BCM4360|BCM4359|BCM4375,CVE-2019-9500,6.8,yes,fragattack
+Broadcom,BCM43|BCM4360|BCM4359|BCM4375,CVE-2019-15126,7.5,yes,krack
+Intel,8260|8265|9260|9462|9560,CVE-2020-24588,8.2,yes,fragattack
+Intel,8260|8265|9260|9462|9560,CVE-2020-26139,7.5,yes,fragattack
+Intel,8260|8265|9260|9462|9560,CVE-2019-15126,7.5,yes,krack
+Qualcomm,QCA61|QCA93|QCA98|QCA6174|QCA9377,CVE-2018-4407,9.8,yes,broadpwn
+Qualcomm,QCA61|QCA93|QCA98|QCA6174|QCA9377,CVE-2020-24588,8.2,yes,fragattack
+Mediatek,MT76|MT7610|MT7615|MT7921,CVE-2019-15126,7.5,yes,krack
+Mediatek,MT76|MT7610|MT7615|MT7921,CVE-2020-24588,8.2,yes,fragattack
+Mediatek,MT76|MT7610|MT7615|MT7921,CVE-2022-25667,7.8,yes,mediatek
+Realtek,8822|8821|8192|8188|8192eu,CVE-2020-24588,8.2,yes,fragattack
+Realtek,8822|8821|8192|8188|8192eu,CVE-2021-35309,7.5,yes,realtek
+Microsoft,Surface|Windows|Xbox,CVE-2017-13080,7.5,yes,krack
+Microsoft,Surface|Windows|Xbox,CVE-2020-24588,8.2,yes,fragattack
+Samsung,Galaxy|SmartTV|IoT,CVE-2019-15126,7.5,yes,krack
+Samsung,Galaxy|SmartTV|IoT,CVE-2020-24588,8.2,yes,fragattack
+Google,Pixel|Nest|Home|Wifi,CVE-2020-24588,8.2,yes,fragattack
+Google,Pixel|Nest|Home|Wifi,CVE-2020-26139,7.5,yes,fragattack
+Cisco,AirOS|IOS|WLC|AP,CVE-2019-15259,9.8,yes,krack
+Cisco,AirOS|IOS|WLC|AP,CVE-2020-24588,8.2,yes,fragattack
+Cisco,AirOS|IOS|WLC|AP,CVE-2020-3495,7.5,yes,ciscokrack
+Ubiquiti,airMAX|UniFi|AmpliFi,CVE-2019-15126,7.5,yes,krack
+Ubiquiti,airMAX|UniFi|AmpliFi,CVE-2020-24588,8.2,yes,fragattack
+Ubiquiti,airMAX|UniFi|AmpliFi,CVE-2022-2358,8.8,yes,ubiquiti
+TP-Link,Archer|Deco|TL-WR|TL-ER,CVE-2019-15126,7.5,yes,krack
+TP-Link,Archer|Deco|TL-WR|TL-ER,CVE-2020-24588,8.2,yes,fragattack
+TP-Link,Archer|Deco|TL-WR|TL-ER,CVE-2021-27208,9.6,yes,tpwn
+Netgear,Orbi|Nighthawk|R series,CVE-2019-15126,7.5,yes,krack
+Netgear,Orbi|Nighthawk|R series,CVE-2020-24588,8.2,yes,fragattack
+Netgear,Orbi|Nighthawk|R series,CVE-2021-34981,9.8,yes,netgear
+D-Link,DIR|DAP|DCS|DSP,CVE-2019-15126,7.5,yes,krack
+D-Link,DIR|DAP|DCS|DSP,CVE-2020-24588,8.2,yes,fragattack
+Espressif,ESP8266|ESP32|ESP32-S2|ESP32-C3,CVE-2019-15126,7.5,yes,krack
+Espressif,ESP8266|ESP32|ESP32-S2|ESP32-C3,CVE-2020-24588,8.2,yes,fragattack
+Espressif,ESP8266|ESP32|ESP32-S2|ESP32-C3,CVE-2020-26139,7.5,yes,fragattack
+Texas Instruments,CC32xx|WL18xx|CC31xx,CVE-2019-15126,7.5,yes,krack
+Texas Instruments,CC32xx|WL18xx|CC31xx,CVE-2020-24588,8.2,yes,fragattack
+Nordic Semiconductor,nRF52|nRF53|nRF70,CVE-2020-24588,8.2,yes,fragattack
+Nordic Semiconductor,nRF52|nRF53|nRF70,CVE-2020-26139,7.5,yes,fragattack
+Microchip,ATWILC|WINC1500|WINC3400,CVE-2019-15126,7.5,yes,krack
+Microchip,ATWILC|WINC1500|WINC3400,CVE-2020-24588,8.2,yes,fragattack
+Marvell,88W8782|88W8897|88W8997,CVE-2019-15126,7.5,yes,krack
+Marvell,88W8782|88W8897|88W8997,CVE-2020-24588,8.2,yes,fragattack
+Zyxel,NWA|WAC|USG|ZyWALL,CVE-2019-15126,7.5,yes,krack
+Zyxel,NWA|WAC|USG|ZyWALL,CVE-2020-24588,8.2,yes,fragattack
+Huawei,Honor|P series|Mate|WiFi Router,CVE-2019-15126,7.5,yes,krack
+Huawei,Honor|P series|Mate|WiFi Router,CVE-2020-24588,8.2,yes,fragattack
+Xiaomi,MI|Redmi|MiWiFi,CVE-2019-15126,7.5,yes,krack
+Xiaomi,MI|Redmi|MiWiFi,CVE-2020-24588,8.2,yes,fragattack
+Amazon,Echo|Kindle|Ring|Blink,CVE-2019-15126,7.5,yes,krack
+Amazon,Echo|Kindle|Ring|Blink,CVE-2020-24588,8.2,yes,fragattack
+Sonos,Play|One|Beam|Roam,CVE-2020-24588,8.2,yes,fragattack
+Raspberry Pi,Pi 3|Pi 4|Pi Zero W|CM4,CVE-2019-15126,7.5,yes,krack
+Raspberry Pi,Pi 3|Pi 4|Pi Zero W|CM4,CVE-2020-24588,8.2,yes,fragattack
+Silicon Labs,WF200|WFM200|RS9116,CVE-2020-24588,8.2,yes,fragattack
+Philips,Hue|SmartBridge,CVE-2019-15126,7.5,yes,krack
+Asus,RT-AC|RT-AX|ZenWiFi,CVE-2020-24588,8.2,yes,fragattack
+Asus,RT-AC|RT-AX|ZenWiFi,CVE-2022-26376,7.8,yes,asuswrt
+Ruckus,ZoneFlex|Ruckus AP|ICX,CVE-2019-15126,7.5,yes,krack
+Aruba,ArubaOS|Instant AP|Mobility,CVE-2019-15126,7.5,yes,krack
+Juniper,Mist|Juniper EX|SRX,CVE-2019-15126,7.5,yes,krack
+Belkin,WeMo|NetCam|Router,CVE-2020-24588,8.2,yes,fragattack
+Wyze,Cam|Cam v2|Cam Pan,CVE-2019-15126,7.5,yes,krack
+August,Smart Lock|Doorbell,CVE-2020-24588,8.2,yes,fragattack
+LG,Smart TV|ThinQ|WiFi Speaker,CVE-2019-15126,7.5,yes,krack
+Sony,PlayStation|Bravia|Android TV,CVE-2020-24588,8.2,yes,fragattack
