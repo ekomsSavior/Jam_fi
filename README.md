@@ -237,7 +237,9 @@ Add real payloads here! These get served by the MITM module:
 | `macro.vba`            | Word macro payload (manual delivery)    |
 | `loot_dropper.py`      | Python dropper or payload loader        |
 
+
 also check out the payloads_README in the payloads folder xo
+
 ---
 
 ## Evil AP – Rogue Access Point with Credential Harvesting
