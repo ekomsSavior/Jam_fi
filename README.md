@@ -9,7 +9,7 @@
 
 ## What is Jam_Fi?
 
-Jam_Fi is an offensive wireless toolkit for Kali Linux, built for red team simulation, network disruption research, and Wi-Fi exploitation education. It includes modules for:
+Jam_Fi is an offensive wireless toolkit, built for red team simulations, network disruption research, and Wi-Fi exploitation education. It includes modules for:
 
 - Deauthentication attacks
 - WPA handshake capture and cracking
@@ -240,23 +240,122 @@ Add real payloads here! These get served by the MITM module:
 also check out the payloads_README in the payloads folder xo
 ---
 
+## Evil AP – Rogue Access Point with Credential Harvesting
+
+When you choose option **10** in Jam_Fi, you transform your Wi‑Fi adapter into a fully functional rogue access point. This is a classic “evil twin” attack: victims connect to your fake network, and you capture everything they type on your custom phishing page.
+
+### What it does
+
+- **Broadcasts a fake SSID** – You choose the name (e.g., “Starbucks Free Wi‑Fi”, “Airport Hotspot”, “Cafe Net”). The network can be open or WPA2‑protected (default password: `password123`).
+- **Provides DHCP & DNS** – Victims automatically get an IP address (10.0.0.x range). All DNS requests are spoofed to point to your attacker machine (10.0.0.1).
+- **Serves a phishing login page** – Any HTTP request is redirected to `http://10.0.0.1`, where your custom `login.html` is displayed.
+- **Logs credentials** – When a victim submits the form, the username and password are saved to `loot/creds.txt` with a timestamp.
+- **Transparent redirection** – After “logging in”, the victim is redirected to a harmless page (e.g., the real Wi‑Fi login of the target network) to avoid suspicion.
+
+### How it works (technical)
+
+Jam_Fi automatically:
+1. Stops monitor mode and switches your adapter to **managed mode** (e.g., `wlan0`).
+2. Assigns the IP `10.0.0.1/24` to the interface.
+3. Launches `hostapd` to broadcast the rogue SSID (configuration saved in `loot/hostapd.conf`).
+4. Launches `dnsmasq` to handle DHCP leases and DNS spoofing (configuration in `loot/dnsmasq.conf`).
+5. Starts a custom Python HTTP server that serves your phishing page and logs POST requests.
+6. Optionally launches the JamFi DNS spoofer to capture and redirect all DNS queries.
+
+When the victim submits the form, the server writes the credentials to `loot/creds.txt` and returns a “Connected” message. The victim believes they have authenticated successfully.
+
+### Customisation
+
+Edit `loot/login.html` to create your own phishing page. The example below mimics a generic Wi‑Fi login portal:
+
+```html
+<h2>Welcome to Starbucks Free Wi-Fi</h2>
+<p>Please sign in to continue</p>
+<form method="POST" action="/login">
+  <input type="text" name="username" placeholder="Email"><br>
+  <input type="password" name="password" placeholder="Wi-Fi Password"><br>
+  <input type="submit" value="Connect">
+</form>
+```
+
+You can customise:
+- **Branding** – Replace “Starbucks” with any network name (e.g., “Airport Free Wi‑Fi”, “Hotel Guest”).
+- **Fields** – Add more input fields (e.g., “Phone Number”, “Credit Card” – for authorised testing only).
+- **Styling** – Use inline CSS or link to external stylesheets (place them in `loot/`).
+- **Redirect after POST** – The current server returns a simple “Connected” page. You can modify the Python code in the Evil AP function to redirect to any URL.
+
+### Captured credentials
+
+Every login attempt is appended to `loot/creds.txt` in the format:
+
+```
+[2026-04-28 21:34:12] Username: johndoe@example.com Password: mypassword123
+```
+
+Check the loot folder anytime using option **9 – View Loot**.
+
+### Important notes
+
+- **Monitor mode is temporarily disabled** – Evil AP runs in managed mode. After you stop the attack (press `Ctrl+C`), Jam_Fi automatically restarts monitor mode on your adapter.
+- **The default password is `password123`** – You can change it by editing the generated `loot/hostapd.conf` before launching the attack (look for `wpa_passphrase`).
+- **The network is on channel 6** – You can modify the channel in `hostapd.conf` if needed.
+- **All configuration files are saved in `loot/`** – This allows you to reuse or tweak them for future attacks.
+
 ---
 
-##  MITM HID Injection Overview
+> **Disclaimer and Reminder** – Evil AP attacks are highly effective for credential theft and should only be used in isolated labs or with written permission from the network owner. Misuse is illegal.
 
-When you choose option `11` in JamFi:
+---
 
--  Broadcasts a fake SSID using beacon spoofing  
--  Clients connect and are served `injection.html`  
--  JavaScript keylogger logs user keystrokes (including special keys)  
--  Page auto-redirects to `fake_update.html`  
--  Payload downloads when the user clicks **Update**  
--  Logs are saved to `loot/session_log_*.txt` and `loot/keystroke_log_*.txt`
+## MITM HID Injection Overview
 
-All files are served from:  
-`http://10.0.0.1`
+When you choose option **11** in Jam_Fi, you launch a full Man‑in‑the‑Middle attack designed to harvest credentials, log keystrokes, and deliver payloads – all while the victim thinks they are connecting to a legitimate Wi‑Fi network.
 
-To add your own payloads, drop them into the `payloads/` folder. JamFi will automatically load and offer them during MITM mode.
+### How it works
+
+1. **Fake Access Point** – Jam_Fi broadcasts a rogue SSID (you choose the name) using beacon spoofing. Clients in range see it as a real network.
+
+2. **Automatic DNS & Traffic Redirection** – Once a client connects, all their DNS requests are spoofed to point to the attacker’s IP (`10.0.0.1`). Every HTTP request is silently redirected to the attacker’s web server.
+
+3. **Injection Page** – The victim is served `injection.html`, a fake “System Update Required” page.  
+   - A **JavaScript keylogger** captures every keystroke (including special keys like Enter, Backspace, Arrows, etc.) and sends them in batches every 2 seconds to the server.  
+   - After 5 seconds, the page automatically redirects to `fake_update.html`.
+
+4. **Fake Update Page** – The victim is prompted to click a button to install a “security update”.  
+   - If you selected a payload from your `payloads/` folder, the button triggers an automatic download of that file (renamed as `Security_Update.exe`).  
+   - After download, the victim is redirected to a harmless site (e.g., Google) to avoid suspicion.
+
+5. **Payload Serving** – Any file you place in the `payloads/` folder will be listed when you start the MITM module. Choose one (or none for keylogger only) and Jam_Fi serves it automatically.  
+   - Supported payloads: `.exe`, `.bat`, `.apk`, `.zip`, `.vba`, `.py`, `.html`, etc.
+
+6. **Keystroke Logging** – All captured keystrokes are saved to `loot/keystroke_log_*.txt`.  
+   - Session metadata (IP, User‑Agent, requested path) is stored in `loot/session_log_*.txt`.
+
+7. **Ngrok Support** – Want to deliver payloads remotely? When you enable Ngrok, Jam_Fi:  
+   - Starts a public tunnel on port 80.  
+   - Rewrites the injected HTML to use the public Ngrok URL.  
+   - Allows victims outside your local network to interact with the attack (use only in authorized labs).
+
+### Example workflow
+
+1. Victim sees “Free_Public_WiFi” and connects.
+2. They open a browser and are greeted with: *“Critical System Update Required”*.
+3. While they read, every key they type is sent to your `keystroke_log.txt`.
+4. After 5 seconds, they are redirected to a page that says “Click to install the update”.
+5. When they click, your chosen payload (e.g., `payload.exe`) downloads.
+6. Everything is logged, and you walk away with credentials, keystrokes, and a backdoor on the target machine.
+
+### Customisation
+
+- Edit `loot/injection.html` to change the fake update message or keylogger behaviour.  
+- Edit `loot/fake_update.html` to modify the download button or redirection URL.  
+- Add your own payloads to `payloads/` – Jam_Fi lists them automatically when you start the MITM module.
+
+All files are served from `http://10.0.0.1`. For remote access, answer `y` when asked about Ngrok and follow the on‑screen URL.
+
+---
+
+> ** Disclaimer** – This module is for educational and authorised testing only. Never deploy against networks or devices you do not own or have explicit permission to assess.
 
 ---
 
@@ -308,7 +407,6 @@ Edit `loot/login.html` to create a custom phishing page:
 
 Captured credentials are logged to `loot/creds.txt`.
 
-
 ---
 
 ## Disclaimer
@@ -319,3 +417,5 @@ Do not use this tool against networks or devices you do not own or have permissi
 
 Use responsibly, ethically, and within legal boundaries.
 
+
+<img width="700" height="178" alt="image1(1)" src="https://github.com/user-attachments/assets/4e636110-4be3-4963-ab1d-8968fbac8528" />
