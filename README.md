@@ -389,28 +389,6 @@ That’s it! When you launch MITM Mode and choose Ngrok, JamFi will automaticall
 >  **Warning:** Ngrok links are public. Use only in secure test labs.
 
 ---
-
-
----
-
-## Evil AP Customization
-
-Edit `loot/login.html` to create a custom phishing page:
-
-```html
-<h2>Welcome to Starbucks Free Wi-Fi</h2>
-<p>Please sign in to continue</p>
-<form method="POST" action="/login">
-  <input type="text" name="username" placeholder="Email"><br>
-  <input type="password" name="password" placeholder="Wi-Fi Password"><br>
-  <input type="submit" value="Connect">
-</form>
-```
-
-Captured credentials are logged to `loot/creds.txt`.
-
----
-
 ## Disclaimer
 
 Jam_Fi is provided for **educational and authorized security research only**.
