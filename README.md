@@ -6,9 +6,6 @@
 
 <img width="374" height="109" alt="jamfi" src="https://github.com/user-attachments/assets/47d5a04d-ce40-4bfb-8ca6-759851111389" />
 
-
-## What is Jam_Fi?
-
 Jam_Fi is an offensive wireless toolkit, built for red team simulations, network disruption research, and Wi-Fi exploitation education. It includes modules for:
 
 - Deauthentication attacks
