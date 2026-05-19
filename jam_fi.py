@@ -377,10 +377,6 @@ log-dhcp
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
 
-    subprocess.run(["sudo", "pkill", "-f", "dnsmasq"])
-    subprocess.run(["sudo", "pkill", "-f", "jamfi_dns_spoofer.py"])
-    time.sleep(1) 
-
     print("Launching JamFi DNS spoofer...")
     subprocess.Popen(["python3", "jamfi_dns_spoofer.py"])
 
@@ -592,10 +588,6 @@ setTimeout(function() {
     subprocess.run(["sudo", "iptables", "-t", "nat", "-F"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "DNAT", "--to-destination", "10.0.0.1:80"])
     subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "POSTROUTING", "-j", "MASQUERADE"])
-
-    subprocess.run(["sudo", "pkill", "-f", "dnsmasq"])
-    subprocess.run(["sudo", "pkill", "-f", "jamfi_dns_spoofer.py"])
-    time.sleep(1)  
 
     print("Starting Python DNS spoofer...")
     subprocess.Popen(["python3", "../jamfi_dns_spoofer.py"])
