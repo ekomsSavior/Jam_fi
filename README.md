@@ -1,4 +1,4 @@
-# Jam_Fi – Wi-Fi Chaos Tool  
+# Jam_Fi – Wi-Fi Chaos Tool
 
 ![ek0ms Banner](https://img.shields.io/badge/ek0ms-certified_ethcial_hacker-blACK)
 
@@ -13,14 +13,14 @@ Jam_Fi is an offensive wireless toolkit, built for red team simulations, network
 - Probe request and junk frame flooding
 - Evil twin access points with credential logging
 - Karma responder beacon spoofing
-- MITM injection with fake update pages and keystroke logging.
+- MITM injection with fake update pages and keystroke logging
 - Custom captive portals and payload delivery
 - Now with Ngrok Support!
 - **CVE Vulnerability Scanner & Exploit Launcher** (NEW)
 - **Auto-Pwn Mode – Full Intrusive Chain** (NEW)
 - **Router Exploitation – Over‑the‑Air & IP‑based** (NEW)
 
-DISCLAIMER : All features are designed for local lab use and legal environments only.
+DISCLAIMER: All features are designed for local lab use and legal environments only.
 
 ---
 
@@ -39,9 +39,10 @@ Install dependencies
 sudo apt update
 sudo apt install -y aircrack-ng hostapd dnsmasq python3-scapy
 ```
+
 ---
 
-##  ngrok Setup
+## Ngrok Setup
 
 ```bash
 wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
@@ -80,16 +81,16 @@ Jam_Fi now **automatically handles interface mode switching** for you. When you 
 
 Required for:
 
-- Scan Clients & APs  
-- Deauth One Client  
-- Deauth All Clients  
-- Probe Request Spam  
-- Junk Packet Flood  
-- Karma Responder  
-- Chaos Mode  
-- MITM HID Injection  
-- CVE Vulnerability Scanner  
-- Auto-Pwn Mode  
+- Scan Clients & APs
+- Deauth One Client
+- Deauth All Clients
+- Probe Request Spam
+- Junk Packet Flood
+- Karma Responder
+- Chaos Mode
+- MITM HID Injection
+- CVE Vulnerability Scanner
+- Auto-Pwn Mode
 - Router Exploits (over‑the‑air attacks)
 
 Enable manually with:
@@ -106,11 +107,11 @@ Your monitor interface will usually be called `wlan0mon`.
 
 Required for:
 
-- Evil AP  
-- Captive portal phishing  
-- DNS redirection  
-- Loot viewing  
-- Cracking captured handshakes (optional)  
+- Evil AP
+- Captive portal phishing
+- DNS redirection
+- Loot viewing
+- Cracking captured handshakes (optional)
 - Router Exploits (IP‑based exploits – automatic association)
 
 Switch back with
@@ -127,7 +128,6 @@ sudo systemctl start NetworkManager
 ## Jam_Fi Modules Overview
 
 <img width="688" height="668" alt="IMG_3145" src="https://github.com/user-attachments/assets/db35adb9-6d25-463b-a20e-8e415093c87e" />
-
 
 ### Descriptions
 
@@ -151,9 +151,9 @@ sudo systemctl start NetworkManager
 
 This module performs deep fingerprinting of nearby Wi‑Fi clients (not APs) to identify known CVEs based on MAC OUI, hostname, user‑agent, and chipset information. It then offers to launch matching exploits.
 
-- **How it works** – Uses the monitor interface to sniff ARP, DHCP, and probe requests, building a detailed profile of each client (OS, vendor, chipset, probed SSIDs).  
-- **CVE matching** – Compares client data against a local `loot/cve_db.csv` database (pre‑populated with dozens of high‑impact wireless/client CVEs).  
-- **Exploit launching** – For matched CVEs (e.g., KRACK, Broadpwn, FragAttacks) you can automatically trigger the appropriate exploit.  
+- **How it works** – Uses the monitor interface to sniff ARP, DHCP, and probe requests, building a detailed profile of each client (OS, vendor, chipset, probed SSIDs).
+- **CVE matching** – Compares client data against a local `loot/cve_db.csv` database (pre‑populated with dozens of high‑impact wireless/client CVEs).
+- **Exploit launching** – For matched CVEs (e.g., KRACK, Broadpwn, FragAttacks) you can automatically trigger the appropriate exploit.
 - **Example** – Detects an iPhone running iOS 14.2 and offers to launch KRACK (CVE‑2019‑15126).
 
 ### 13. Auto-Pwn Mode – Full Intrusive Chain
@@ -166,23 +166,23 @@ A comprehensive router exploitation module that works **both in monitor mode (no
 
 #### Features
 
-- **Channel hopping** – Scans all 13 2.4 GHz channels to discover every AP in range (hundreds found in dense areas).  
-- **OUI manufacturer lookup** – Identifies router vendor (TP‑Link, Huawei, Asus, Netgear, D‑Link, Zyxel, Arris, Tenda, Cisco, Linksys, MikroTik, etc.) from the BSSID.  
-- **Automatic vulnerability mapping** – Shows known CVEs and botnet exploits for each detected vendor.  
+- **Channel hopping** – Scans all 13 2.4 GHz channels to discover every AP in range (hundreds found in dense areas).
+- **OUI manufacturer lookup** – Identifies router vendor (TP‑Link, Huawei, Asus, Netgear, D‑Link, Zyxel, Arris, Tenda, Cisco, Linksys, MikroTik, etc.) from the BSSID.
+- **Automatic vulnerability mapping** – Shows known CVEs and botnet exploits for each detected vendor.
 
 #### Attack Options
 
-1. **Auto‑Connect & IP Exploits**  
-   - Temporarily associates with the selected AP (WPA2‑PSK or open).  
-   - Automatically obtains a DHCP lease and detects the gateway IP.  
-   - Launches **manufacturer‑specific exploits** including:  
-     - Quad7 Botnet (CVE‑2023‑50224, CVE‑2025‑9377)  
-     - AVrecon (Russian GRU espionage malware)  
-     - AyySSHush (Asus persistent SSH backdoor)  
-     - Dray:Break (DrayTek multiple RCE)  
-     - CVE‑2023‑33538 (EoL TP‑Link Mirai)  
-     - Classic exploits: Huawei UPnP, MikroTik WinBox, TP‑Link auth bypass, Netgear CGI, D‑Link Hedwig, Zyxel weblogin  
-   - After successful exploitation, can install a **persistent backdoor** (cron job, startup script, or reverse shell).  
+1. **Auto‑Connect & IP Exploits**
+   - Temporarily associates with the selected AP (WPA2‑PSK or open).
+   - Automatically obtains a DHCP lease and detects the gateway IP.
+   - Launches **manufacturer‑specific exploits** including:
+     - Quad7 Botnet (CVE‑2023‑50224, CVE‑2025‑9377)
+     - AVrecon (Russian GRU espionage malware)
+     - AyySSHush (Asus persistent SSH backdoor)
+     - Dray:Break (DrayTek multiple RCE)
+     - CVE‑2023‑33538 (EoL TP‑Link Mirai)
+     - Classic exploits: Huawei UPnP, MikroTik WinBox, TP‑Link auth bypass, Netgear CGI, D‑Link Hedwig, Zyxel weblogin
+   - After successful exploitation, can install a **persistent backdoor** (cron job, startup script, or reverse shell).
    - Automatically restores monitor mode when finished.
 
 2. **Deauth Attack** – Floods the target AP with deauthentication frames, disconnecting all clients (pure monitor mode, no IP needed).
@@ -191,13 +191,55 @@ A comprehensive router exploitation module that works **both in monitor mode (no
 
 4. **Client Traffic Capture** – Sniffs nearby client activity (MAC addresses, probe requests) for reconnaissance.
 
-5. **Manual IP Entry** – For when you already know the router’s IP (e.g., your own lab) and want to skip auto‑association.
+5. **Manual IP Entry** – For when you already know the router's IP (e.g., your own lab) and want to skip auto‑association.
 
 > **Why over‑the‑air?** Many botnets (Quad7, AVrecon) operate purely by scanning beacon frames and launching deauth/flood attacks. Our module supports that style, but also goes further by associating when a real IP‑based exploit is needed.
 
 #### Supported Router Vendors (Partial List)
 
 - TP‑Link, Huawei, Asus, Netgear, D‑Link, Zyxel, Arris, Tenda, Cisco, Linksys, MikroTik, Actiontec, Verizon, T‑Mobile, Mediatek, DrayTek
+
+---
+
+## NEW: Tenda Backdoor Exploit (CVE-2026-11405)
+
+Jam_Fi now includes an exploit for **CVE-2026-11405**, a critical hidden authentication backdoor discovered in multiple Tenda router models (AC5, AC6, AC10, FH1201, W15E, and others). This vulnerability was originally documented by CERT/CC (VU#213560) and remains unpatched.
+
+### What is CVE-2026-11405?
+
+The Tenda web server (`/bin/httpd`) contains an undocumented backdoor in the login function. When normal password authentication fails, the router checks a hidden password stored in the device configuration (`sys.rzadmin.password`) and performs a plaintext comparison against the submitted password. If they match, you are granted **full administrative access (role=2)** regardless of the username provided.
+
+**Impact** – Full admin control. An attacker can reconfigure the device, alter network settings, disable security features, and compromise the entire local network.
+
+### How to Use It in Jam_Fi
+
+1. Launch Jam_Fi and select **option 14 – Router Exploits**.
+2. Scan for nearby APs – Tenda routers will now show `[VULNERABLE]`.
+3. Select your target and choose an attack option:
+
+   - **Option 1 – Auto-Connect & IP Exploits**  
+     Jam_Fi will automatically associate with the target AP (you'll need to provide the Wi‑Fi password), obtain a DHCP lease, detect the gateway IP, and test the backdoor using a list of known default passwords. If one matches, you'll get full admin access.
+
+   - **Option 5 – Manual IP Entry**  
+     If you already know the router's IP, you can enter it directly and launch the exploit immediately without association.
+
+4. If the backdoor password is one of the known defaults, Jam_Fi will report a successful exploit and grant you admin‑level control over the router.
+
+### Known Default Backdoor Passwords
+
+Jam_Fi currently tests the following passwords (you can add more in the `exploit_tenda_backdoor()` function):
+
+- `Fireitup@321`
+- `Fireitup`
+- `12345678`
+- `admin`
+- `password`
+- `Tenda@2023`
+- `szadmin`
+
+### Why This Matters
+
+CVE-2026-11405 has **no official patch** from the vendor, who appears to be unreachable. The only effective mitigations are to **disable remote management** and **change the default LAN IP** to avoid opportunistic scanning. Jam_Fi gives you a safe, controlled way to test whether your own Tenda devices are vulnerable.
 
 ---
 
@@ -234,22 +276,21 @@ Add real payloads here! These get served by the MITM module:
 | `macro.vba`            | Word macro payload (manual delivery)    |
 | `loot_dropper.py`      | Python dropper or payload loader        |
 
-
 also check out the payloads_README in the payloads folder xo
 
 ---
 
 ## Evil AP – Rogue Access Point with Credential Harvesting
 
-When you choose option **10** in Jam_Fi, you transform your Wi‑Fi adapter into a fully functional rogue access point. This is a classic “evil twin” attack: victims connect to your fake network, and you capture everything they type on your custom phishing page.
+When you choose option **10** in Jam_Fi, you transform your Wi‑Fi adapter into a fully functional rogue access point. This is a classic "evil twin" attack: victims connect to your fake network, and you capture everything they type on your custom phishing page.
 
 ### What it does
 
-- **Broadcasts a fake SSID** – You choose the name (e.g., “Starbucks Free Wi‑Fi”, “Airport Hotspot”, “Cafe Net”). The network can be open or WPA2‑protected (default password: `password123`).
+- **Broadcasts a fake SSID** – You choose the name (e.g., "Starbucks Free Wi‑Fi", "Airport Hotspot", "Cafe Net"). The network can be open or WPA2‑protected (default password: `password123`).
 - **Provides DHCP & DNS** – Victims automatically get an IP address (10.0.0.x range). All DNS requests are spoofed to point to your attacker machine (10.0.0.1).
 - **Serves a phishing login page** – Any HTTP request is redirected to `http://10.0.0.1`, where your custom `login.html` is displayed.
 - **Logs credentials** – When a victim submits the form, the username and password are saved to `loot/creds.txt` with a timestamp.
-- **Transparent redirection** – After “logging in”, the victim is redirected to a harmless page (e.g., the real Wi‑Fi login of the target network) to avoid suspicion.
+- **Transparent redirection** – After "logging in", the victim is redirected to a harmless page (e.g., the real Wi‑Fi login of the target network) to avoid suspicion.
 
 ### How it works (technical)
 
@@ -261,7 +302,7 @@ Jam_Fi automatically:
 5. Starts a custom Python HTTP server that serves your phishing page and logs POST requests.
 6. Optionally launches the JamFi DNS spoofer to capture and redirect all DNS queries.
 
-When the victim submits the form, the server writes the credentials to `loot/creds.txt` and returns a “Connected” message. The victim believes they have authenticated successfully.
+When the victim submits the form, the server writes the credentials to `loot/creds.txt` and returns a "Connected" message. The victim believes they have authenticated successfully.
 
 ### Customisation
 
@@ -278,10 +319,10 @@ Edit `loot/login.html` to create your own phishing page. The example below mimic
 ```
 
 You can customise:
-- **Branding** – Replace “Starbucks” with any network name (e.g., “Airport Free Wi‑Fi”, “Hotel Guest”).
-- **Fields** – Add more input fields (e.g., “Phone Number”, “Credit Card” – for authorised testing only).
+- **Branding** – Replace "Starbucks" with any network name (e.g., "Airport Free Wi‑Fi", "Hotel Guest").
+- **Fields** – Add more input fields (e.g., "Phone Number", "Credit Card" – for authorised testing only).
 - **Styling** – Use inline CSS or link to external stylesheets (place them in `loot/`).
-- **Redirect after POST** – The current server returns a simple “Connected” page. You can modify the Python code in the Evil AP function to redirect to any URL.
+- **Redirect after POST** – The current server returns a simple "Connected" page. You can modify the Python code in the Evil AP function to redirect to any URL.
 
 ### Captured credentials
 
@@ -314,40 +355,40 @@ When you choose option **11** in Jam_Fi, you launch a full Man‑in‑the‑Midd
 
 1. **Fake Access Point** – Jam_Fi broadcasts a rogue SSID (you choose the name) using beacon spoofing. Clients in range see it as a real network.
 
-2. **Automatic DNS & Traffic Redirection** – Once a client connects, all their DNS requests are spoofed to point to the attacker’s IP (`10.0.0.1`). Every HTTP request is silently redirected to the attacker’s web server.
+2. **Automatic DNS & Traffic Redirection** – Once a client connects, all their DNS requests are spoofed to point to the attacker's IP (`10.0.0.1`). Every HTTP request is silently redirected to the attacker's web server.
 
-3. **Injection Page** – The victim is served `injection.html`, a fake “System Update Required” page.  
-   - A **JavaScript keylogger** captures every keystroke (including special keys like Enter, Backspace, Arrows, etc.) and sends them in batches every 2 seconds to the server.  
+3. **Injection Page** – The victim is served `injection.html`, a fake "System Update Required" page.
+   - A **JavaScript keylogger** captures every keystroke (including special keys like Enter, Backspace, Arrows, etc.) and sends them in batches every 2 seconds to the server.
    - After 5 seconds, the page automatically redirects to `fake_update.html`.
 
-4. **Fake Update Page** – The victim is prompted to click a button to install a “security update”.  
-   - If you selected a payload from your `payloads/` folder, the button triggers an automatic download of that file (renamed as `Security_Update.exe`).  
+4. **Fake Update Page** – The victim is prompted to click a button to install a "security update".
+   - If you selected a payload from your `payloads/` folder, the button triggers an automatic download of that file (renamed as `Security_Update.exe`).
    - After download, the victim is redirected to a harmless site (e.g., Google) to avoid suspicion.
 
-5. **Payload Serving** – Any file you place in the `payloads/` folder will be listed when you start the MITM module. Choose one (or none for keylogger only) and Jam_Fi serves it automatically.  
+5. **Payload Serving** – Any file you place in the `payloads/` folder will be listed when you start the MITM module. Choose one (or none for keylogger only) and Jam_Fi serves it automatically.
    - Supported payloads: `.exe`, `.bat`, `.apk`, `.zip`, `.vba`, `.py`, `.html`, etc.
 
-6. **Keystroke Logging** – All captured keystrokes are saved to `loot/keystroke_log_*.txt`.  
+6. **Keystroke Logging** – All captured keystrokes are saved to `loot/keystroke_log_*.txt`.
    - Session metadata (IP, User‑Agent, requested path) is stored in `loot/session_log_*.txt`.
 
-7. **Ngrok Support** – Want to deliver payloads remotely? When you enable Ngrok, Jam_Fi:  
-   - Starts a public tunnel on port 80.  
-   - Rewrites the injected HTML to use the public Ngrok URL.  
+7. **Ngrok Support** – Want to deliver payloads remotely? When you enable Ngrok, Jam_Fi:
+   - Starts a public tunnel on port 80.
+   - Rewrites the injected HTML to use the public Ngrok URL.
    - Allows victims outside your local network to interact with the attack (use only in authorized labs).
 
 ### Example workflow
 
-1. Victim sees “Free_Public_WiFi” and connects.
-2. They open a browser and are greeted with: *“Critical System Update Required”*.
+1. Victim sees "Free_Public_WiFi" and connects.
+2. They open a browser and are greeted with: *"Critical System Update Required"*.
 3. While they read, every key they type is sent to your `keystroke_log.txt`.
-4. After 5 seconds, they are redirected to a page that says “Click to install the update”.
+4. After 5 seconds, they are redirected to a page that says "Click to install the update".
 5. When they click, your chosen payload (e.g., `payload.exe`) downloads.
 6. Everything is logged, and you walk away with credentials, keystrokes, and a backdoor on the target machine.
 
 ### Customisation
 
-- Edit `loot/injection.html` to change the fake update message or keylogger behaviour.  
-- Edit `loot/fake_update.html` to modify the download button or redirection URL.  
+- Edit `loot/injection.html` to change the fake update message or keylogger behaviour.
+- Edit `loot/fake_update.html` to modify the download button or redirection URL.
 - Add your own payloads to `payloads/` – Jam_Fi lists them automatically when you start the MITM module.
 
 All files are served from `http://10.0.0.1`. For remote access, answer `y` when asked about Ngrok and follow the on‑screen URL.
@@ -358,11 +399,11 @@ All files are served from `http://10.0.0.1`. For remote access, answer `y` when 
 
 ---
 
-##  Ngrok Setup (for Remote Payload Delivery)
+## Ngrok Setup (for Remote Payload Delivery)
 
 Want to serve payloads outside your local network? JamFi supports [Ngrok](https://ngrok.com) for public tunnels.
 
-###  Setup Instructions
+### Setup Instructions
 
 1. Download Ngrok for Linux:
    ```bash
@@ -377,22 +418,21 @@ Want to serve payloads outside your local network? JamFi supports [Ngrok](https:
    ./ngrok config add-authtoken YOUR_AUTHTOKEN
    ```
 
-That’s it! When you launch MITM Mode and choose Ngrok, JamFi will automatically:
+That's it! When you launch MITM Mode and choose Ngrok, JamFi will automatically:
 
 - Start a public tunnel on port 80
 - Rewrite your HTML files to use `https://<your-ngrok>.ngrok-free.app`
 - Serve your payloads globally
 
->  **Warning:** Ngrok links are public. Use only in secure test labs.
+> **Warning:** Ngrok links are public. Use only in secure test labs.
 
 ---
+
 ## Disclaimer
 
 Jam_Fi is provided for **educational and authorized security research only**.
 
 Do not use this tool against networks or devices you do not own or have permission to test.
-
-Use responsibly, ethically, and within legal boundaries.
 
 
 <img width="700" height="178" alt="image1(1)" src="https://github.com/user-attachments/assets/4e636110-4be3-4963-ab1d-8968fbac8528" />
