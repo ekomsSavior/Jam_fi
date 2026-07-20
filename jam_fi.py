@@ -28,6 +28,7 @@ original_interface = None
 ap_mac = None
 stop_attack = False
 scan_results = {}
+
 seen_aps = {}
 clients = {}
 
@@ -62,7 +63,7 @@ def stop_monitor_mode():
         phys_iface = interface.replace('mon', '')
         print(f"[*] Restarting NetworkManager for {phys_iface}...")
         subprocess.run(["sudo", "systemctl", "start", "NetworkManager"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
+
         if original_interface:
             subprocess.run(["sudo", "ip", "link", "set", original_interface, "up"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
@@ -114,7 +115,7 @@ def get_interface():
     
     original_interface = interface
     print(f"[+] Selected interface: {interface}")
-    
+
     result = subprocess.run(['iwconfig', interface], capture_output=True, text=True)
     if 'Mode:Monitor' not in result.stdout:
         print(f"[!] {interface} is not in monitor mode")
@@ -850,7 +851,7 @@ def main():
                 auto_pwn_mode()
                 input("\nPress Enter to continue...")
             elif choice == "14":
-                router_attack_main(interface)
+                interface = router_attack_main(interface) or interface
                 input("\nPress Enter to continue...")
             elif choice == "0":
                 print("Goodbye fren!")
